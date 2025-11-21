@@ -57,11 +57,11 @@ export default function AdminAttributeValue() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <div className="flex items-center gap-2">
-                                        <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition">
-                                            Edit
+                                        <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
+                                            <Edit size={14} />
                                         </button>
-                                        <button className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition">
-                                            Delete
+                                        <button className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition">
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
                                 </td>

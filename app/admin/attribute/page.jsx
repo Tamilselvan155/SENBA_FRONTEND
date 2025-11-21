@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Edit } from "lucide-react"
+import { Plus, Edit, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function AdminAttribute() {
@@ -43,9 +43,14 @@ export default function AdminAttribute() {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{attr.id}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{attr.title}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition">
-                                        <Edit size={14} />
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
+                                            <Edit size={14} />
+                                        </button>
+                                        <button className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition">
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}

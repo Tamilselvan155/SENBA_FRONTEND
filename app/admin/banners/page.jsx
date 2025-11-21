@@ -132,10 +132,10 @@ export default function AdminBanners() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <div className="flex items-center gap-2">
-                                        <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition">
+                                        <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
                                             <Edit size={14} />
                                         </button>
-                                        <button className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition">
+                                        <button className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition">
                                             <Trash2 size={14} />
                                         </button>
                                     </div>
