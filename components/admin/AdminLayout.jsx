@@ -22,7 +22,7 @@ const AdminLayout = ({ children }) => {
         
         // Aggressively hide Next.js development indicator
         const hideNextIndicator = () => {
-            // Method 1: Hide by known selectors
+            // Method 1: Hide by known selectors - INCLUDING BUTTON WATERMARK
             const selectors = [
                 '[data-nextjs-dev-indicator]',
                 '[class*="__next-dev-indicator"]',
@@ -30,7 +30,21 @@ const AdminLayout = ({ children }) => {
                 '[data-testid="nextjs-dev-indicator"]',
                 '[data-testid*="nextjs"]',
                 '.__next-dev-indicator',
-                '#__next-build-watcher'
+                '#__next-build-watcher',
+                // Target the specific button watermark
+                '#next-logo',
+                'button#next-logo',
+                'button[data-next-mark]',
+                'button[data-next-mark="true"]',
+                'button[data-next-mark-loading]',
+                'button[data-nextjs-dev-tools-button]',
+                'button[aria-label="Open Next.js Dev Tools"]',
+                '[aria-controls="nextjs-dev-tools-menu"]',
+                // Target the SVG inside the button
+                'svg[data-next-mark-loading]',
+                'svg[data-next-mark-loading="false"]',
+                'svg[viewBox="0 0 40 40"]',
+                'svg[width="40"][height="40"]'
             ]
             
             selectors.forEach(selector => {
@@ -54,11 +68,42 @@ const AdminLayout = ({ children }) => {
                     // Skip if already hidden
                     if (el.offsetParent === null || style.display === 'none' || style.visibility === 'hidden') return
                     
+                    // Check for button watermark FIRST (highest priority)
+                    const isButtonWatermark = el.tagName === 'BUTTON' && (
+                        el.id === 'next-logo' ||
+                        el.getAttribute('data-next-mark') === 'true' ||
+                        el.getAttribute('data-next-mark-loading') !== null ||
+                        el.getAttribute('data-nextjs-dev-tools-button') === 'true' ||
+                        el.getAttribute('aria-label') === 'Open Next.js Dev Tools' ||
+                        el.getAttribute('aria-controls') === 'nextjs-dev-tools-menu'
+                    )
+                    
+                    // Check for SVG watermark
+                    const isSvgWatermark = el.tagName === 'SVG' && (
+                        el.getAttribute('data-next-mark-loading') !== null ||
+                        el.getAttribute('viewBox') === '0 0 40 40' ||
+                        (el.getAttribute('width') === '40' && el.getAttribute('height') === '40')
+                    )
+                    
                     const hasN = text === 'N' || text === 'n' || innerHTML === 'N' || innerHTML === 'n'
                     const isFixed = style.position === 'fixed' || styleAttr.includes('position: fixed') || styleAttr.includes('position:fixed')
                     const isAbsolute = style.position === 'absolute' || styleAttr.includes('position: absolute') || styleAttr.includes('position:absolute')
                     const isSmall = rect.width < 100 && rect.height < 100
                     const isCircular = style.borderRadius === '50%' || (parseFloat(style.borderRadius) > 0 && rect.width === rect.height)
+                    
+                    // Remove button watermark FIRST (highest priority)
+                    if (isButtonWatermark) {
+                        el.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important; position: absolute !important; left: -9999px !important; top: -9999px !important;'
+                        el.remove()
+                        return
+                    }
+                    
+                    // Remove SVG watermark
+                    if (isSvgWatermark) {
+                        el.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important; position: absolute !important; left: -9999px !important;'
+                        el.remove()
+                        return
+                    }
                     
                     // Remove ANY small element with "N" that looks like a watermark
                     if (hasN && isSmall && (isFixed || isAbsolute || isCircular)) {
@@ -86,6 +131,43 @@ const AdminLayout = ({ children }) => {
                         el.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important; position: absolute !important; left: -9999px !important;'
                         el.remove()
                     }
+                    
+                    // Check for black menu overlay and black lines
+                    const menuId = el.id === 'nextjs-dev-tools-menu' || el.getAttribute('aria-labelledby')?.includes('next')
+                    const bgColor = style.backgroundColor || ''
+                    const hasBlackBg = bgColor.includes('rgb(0, 0, 0)') || bgColor.includes('rgba(0, 0, 0') || bgColor === 'black' || bgColor.includes('#000')
+                    const isBottomLeft = rect.left < 300 && (rect.bottom < 300 || (window.innerHeight - rect.bottom) < 300)
+                    
+                    // Remove menu overlay
+                    if (menuId || (isFixed && isBottomLeft && hasBlackBg)) {
+                        const children = el.querySelectorAll('*')
+                        let hasNextJsContent = false
+                        children.forEach(child => {
+                            const childText = (child.textContent || '').trim()
+                            if (childText.includes('Route') || childText.includes('Turbopack') || childText.includes('Preferences') || childText.includes('Dev Tools')) {
+                                hasNextJsContent = true
+                            }
+                        })
+                        
+                        if (menuId || hasNextJsContent) {
+                            el.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important; position: absolute !important; left: -9999px !important; top: -9999px !important;'
+                            el.remove()
+                            return
+                        }
+                    }
+                    
+                    // Check for black lines/borders
+                    const isBlackLine = (
+                        (rect.height <= 2 && rect.width > 10) || // Horizontal line
+                        (rect.width <= 2 && rect.height > 10) || // Vertical line
+                        (style.borderColor && style.borderColor.includes('rgb(0, 0, 0)')) ||
+                        (style.borderColor && style.borderColor.includes('black'))
+                    ) && isBottomLeft && (isFixed || isAbsolute)
+                    
+                    if (isBlackLine) {
+                        el.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important; position: absolute !important; left: -9999px !important; top: -9999px !important;'
+                        el.remove()
+                    }
                 } catch(e) {}
             })
             
@@ -110,8 +192,8 @@ const AdminLayout = ({ children }) => {
         // Run immediately
         hideNextIndicator()
         
-        // Run on interval
-        const interval = setInterval(hideNextIndicator, 50)
+        // Run on very frequent interval - maximum aggressiveness
+        const interval = setInterval(hideNextIndicator, 10)
         
         // Use MutationObserver to catch dynamically added elements
         const observer = new MutationObserver((mutations) => {

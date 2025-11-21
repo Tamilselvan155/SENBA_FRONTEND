@@ -54,7 +54,7 @@
   background-color: rgb(37 99 235);
 }
 
-/* Hide Next.js development indicator - Comprehensive Rules */
+/* Hide Next.js development indicator - Comprehensive Rules - INCLUDING BUTTON WATERMARK */
 #__next-build-watcher,
 .__next-dev-overlay,
 [data-nextjs-toast],
@@ -67,7 +67,24 @@
 [data-nextjs-dev-indicator],
 [data-testid="nextjs-dev-indicator"],
 [data-testid*="nextjs"],
-[class*="nextjs-dev-indicator"] {
+[class*="nextjs-dev-indicator"],
+/* Target the specific button watermark */
+#next-logo,
+button#next-logo,
+button[data-next-mark],
+button[data-next-mark="true"],
+button[data-next-mark-loading],
+button[data-next-mark-loading="false"],
+button[data-nextjs-dev-tools-button],
+button[data-nextjs-dev-tools-button="true"],
+button[aria-label="Open Next.js Dev Tools"],
+[aria-controls="nextjs-dev-tools-menu"],
+/* Target the SVG inside the button */
+svg[data-next-mark-loading],
+svg[data-next-mark-loading="false"],
+svg[data-next-mark-loading="true"],
+svg[viewBox="0 0 40 40"],
+svg[width="40"][height="40"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -164,12 +181,88 @@ div[style*="position:fixed"][style*="bottom"][style*="left"] {
   left: -9999px !important;
 }
 
-/* Hide the black menu overlay that appears when clicking N - handled by JavaScript */
+/* Hide the black menu overlay that appears when clicking N */
+#nextjs-dev-tools-menu,
+[id="nextjs-dev-tools-menu"],
+[aria-labelledby="next-logo"],
+div[role="menu"],
+div[role="dialog"][aria-labelledby*="next"],
+/* Hide any black lines or borders */
+div[style*="background-color: black"],
+div[style*="background-color:rgb(0,0,0)"],
+div[style*="background-color:rgba(0,0,0"],
+div[style*="background: black"],
+div[style*="background:rgb(0,0,0)"],
+div[style*="background:rgba(0,0,0"],
+div[style*="border: 1px solid black"],
+div[style*="border:1px solid black"],
+div[style*="border-color: black"],
+div[style*="outline: 1px solid black"],
+div[style*="outline:1px solid black"],
+hr[style*="border-color: black"],
+hr[style*="background: black"],
+/* Hide any thin lines in bottom-left */
+div[style*="height: 1px"][style*="position: fixed"],
+div[style*="height:1px"][style*="position:fixed"],
+div[style*="width: 1px"][style*="position: fixed"],
+div[style*="width:1px"][style*="position:fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
 
 /* Additional global rule to hide any watermark-like elements with "N" */
 *[style*="position: fixed"]:not(header):not(nav):not(main):not(article):not(section):not(footer),
 *[style*="position:fixed"]:not(header):not(nav):not(main):not(article):not(section):not(footer) {
   /* This will be handled by JavaScript for precise detection */
+}
+
+/* Target fixed position elements in bottom-left corner - AGGRESSIVE */
+body > div[style*="position: fixed"][style*="left"],
+body > div[style*="position:fixed"][style*="left"],
+body > div[style*="position: fixed"][style*="bottom"],
+body > div[style*="position:fixed"][style*="bottom"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
+
+/* Specifically target sidebar area and nearby elements */
+aside ~ div[style*="position: fixed"],
+aside ~ div[style*="position:fixed"],
+aside + div[style*="position: fixed"],
+aside + div[style*="position:fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Hide any small circular elements in bottom-left */
+div[style*="border-radius"][style*="position: fixed"],
+div[style*="border-radius"][style*="position:fixed"],
+div[style*="border-radius: 50%"][style*="position: fixed"],
+div[style*="border-radius:50%"][style*="position:fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* html, body {

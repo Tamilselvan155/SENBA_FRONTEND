@@ -19,9 +19,9 @@ export default function AdminAttributeValue() {
     ]
 
     return (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white">
             {/* Header Section */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6">
                 <h1 className="text-2xl font-semibold text-blue-600">Attribute Values List</h1>
                 <button 
                     onClick={() => router.push('/admin/attribute-value/add')}
@@ -35,7 +35,7 @@ export default function AdminAttributeValue() {
             {/* Table Section */}
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">#</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Attribute</th>
@@ -43,7 +43,7 @@ export default function AdminAttributeValue() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white">
                         {attributeValues.map((item, index) => (
                             <tr key={item.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">

@@ -51,9 +51,9 @@ export default function AddBannerPage() {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
@@ -148,7 +148,7 @@ export default function AddBannerPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-end gap-3 pt-4">
                     <button
                         type="button"
                         onClick={handleReset}

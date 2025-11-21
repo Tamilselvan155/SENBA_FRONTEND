@@ -16,8 +16,8 @@ export default function AdminAttribute() {
     ]
 
     return (
-        <div className="bg-white rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="bg-white">
+            <div className="flex items-center justify-between p-6">
                 <h1 className="text-2xl font-semibold text-blue-600">Attribute List</h1>
                 <button 
                     onClick={() => router.push('/admin/attribute/add')}
@@ -30,14 +30,14 @@ export default function AdminAttribute() {
             
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">S.N.</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Title</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white">
                         {attributes.map((attr) => (
                             <tr key={attr.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{attr.id}</td>

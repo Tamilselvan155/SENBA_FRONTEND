@@ -19,9 +19,9 @@ export default function AdminCategory() {
     ]
 
     return (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white">
             {/* Header Section */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6">
                 <h1 className="text-2xl font-semibold text-blue-600">Category Lists</h1>
                 <button 
                     onClick={() => router.push('/admin/category/add')}
@@ -33,7 +33,7 @@ export default function AdminCategory() {
             </div>
 
             {/* Controls Section */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-700">Show</span>
                     <select 
@@ -63,7 +63,7 @@ export default function AdminCategory() {
             {/* Table Section */}
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                 <div className="flex items-center gap-1">
@@ -127,7 +127,7 @@ export default function AdminCategory() {
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white">
                         {categories.map((category) => (
                             <tr key={category.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -171,7 +171,7 @@ export default function AdminCategory() {
             </div>
 
             {/* Footer Section */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="px-6 py-4">
                 <p className="text-sm text-gray-700">
                     Showing 1 to {categories.length} of {categories.length} entries
                 </p>
