@@ -1,41 +1,179 @@
 'use client'
-import { Home, Bell, MessageSquare, User, Menu } from "lucide-react"
 
-const AdminNavbar = ({ onToggleSidebar }) => {
+import { usePathname, useRouter } from "next/navigation"
+import { ChevronLeft, User, Settings, LogOut, ChevronDown } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { assets } from "@/assets/assets"
+import { useState } from "react"
+
+const AdminNavbar = ({ actionButtons }) => {
+    const pathname = usePathname()
+    const router = useRouter()
+    const [showUserMenu, setShowUserMenu] = useState(false)
+
+    // Check if we're on a module page (not dashboard)
+    const isModulePage = pathname !== '/admin' && pathname !== '/admin/'
+    
+    // Get module name from path
+    const getModuleName = (path) => {
+        if (path === '/admin') return ''
+        if (path.includes('/products')) {
+            if (path.includes('/add')) return 'Add Product'
+            if (path.includes('/edit')) return 'Edit Product'
+            return 'Products'
+        }
+        if (path.includes('/category')) {
+            if (path.includes('/add')) return 'Add Category'
+            return 'Category'
+        }
+        if (path.includes('/brands')) {
+            if (path.includes('/add')) return 'Add Brand'
+            return 'Brands'
+        }
+        if (path.includes('/banners')) {
+            if (path.includes('/add')) return 'Add Banner'
+            return 'Banners'
+        }
+        if (path.includes('/attribute-value')) {
+            if (path.includes('/add')) return 'Add Attribute Value'
+            return 'Attribute Values'
+        }
+        if (path.includes('/attribute')) {
+            if (path.includes('/add')) return 'Add Attribute'
+            return 'Attributes'
+        }
+        if (path.includes('/stores')) return 'Stores'
+        if (path.includes('/coupons')) return 'Coupons'
+        if (path.includes('/asset-manager')) return 'Asset Manager'
+        
+        const pathName = path.split('/').pop()
+        if (!pathName) return ''
+        
+        return pathName
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+    }
+
+    const moduleName = getModuleName(pathname)
+
+    const handleBack = () => {
+        router.push('/admin')
+    }
+
+    const handleLogout = () => {
+        // Implement logout logic
+        router.push('/login')
+    }
+
     return (
-        <div className="flex h-14 items-center justify-between px-6 bg-gray-100 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-                <button 
-                    onClick={onToggleSidebar}
-                    className="p-2 hover:bg-gray-200 rounded-md transition-colors"
-                >
-                    <Menu size={20} className="text-gray-700" />
-                </button>
-                {/* <button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-md transition">
-                    Storage Link
-                </button>
-                <button className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-md transition">
-                    Cache Clear
-                </button> */}
+        <header className="bg-[#f0f9ff] border-b border-[#009fe3]/20 sticky top-0 z-50 shadow-sm">
+            <div className="flex items-center justify-between h-16 px-6">
+                {/* Left Section */}
+                <div className="flex items-center space-x-4">
+                    {isModulePage && (
+                        <button
+                            onClick={handleBack}
+                            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-colors cursor-pointer"
+                            title="Back to Dashboard"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                    )}
+                    
+                    {!isModulePage && (
+                        <div className="flex items-center space-x-3">
+                            <Image 
+                                src={assets.gs_logo || assets.WV_logo} 
+                                alt="logo" 
+                                width={50} 
+                                height={50} 
+                                className="cursor-pointer" 
+                            />
+                            <h1 className="text-2xl font-bold text-[#009fe3]">
+                                GoCart Admin
+                            </h1>
+                        </div>
+                    )}
+                    
+                    {isModulePage && (
+                        <h2 className="text-xl font-semibold text-gray-900">{moduleName}</h2>
+                    )}
+                </div>
+
+                {/* Right Section */}
+                <div className="flex items-center space-x-4">
+                    {/* Action Buttons */}
+                    {actionButtons && (
+                        <div className="flex items-center space-x-3">
+                            {actionButtons}
+                        </div>
+                    )}
+                    
+                    {/* Profile Dropdown - Only on Dashboard */}
+                    {!isModulePage && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowUserMenu(!showUserMenu)}
+                                className="flex items-center space-x-2 px-2 py-1.5 hover:bg-white/60 rounded-lg transition-colors group cursor-pointer"
+                            >
+                                <div className="hidden md:block text-left">
+                                    <div className="text-sm font-medium text-gray-900">Admin</div>
+                                    <div className="text-xs text-gray-500">Administrator</div>
+                                </div>
+                                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <User className="w-4 h-4 text-white" />
+                                </div>
+                                <ChevronDown className="hidden md:block text-gray-400 group-hover:text-gray-600 transition-colors w-3 h-3" />
+                            </button>
+                            
+                            {showUserMenu && (
+                                <>
+                                    <div 
+                                        className="fixed inset-0 z-10" 
+                                        onClick={() => setShowUserMenu(false)}
+                                    />
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 py-1">
+                                        <div className="px-4 py-3 border-b border-gray-200">
+                                            <div className="font-semibold text-gray-900 text-sm">Admin</div>
+                                            <div className="text-xs text-gray-500 mt-0.5">admin@gocart.com</div>
+                                        </div>
+                                        <Link
+                                            href="/admin/profile"
+                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            <User className="w-4 h-4 mr-3" />
+                                            Profile
+                                        </Link>
+                                        <Link
+                                            href="/admin/settings"
+                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            <Settings className="w-4 h-4 mr-3" />
+                                            Settings
+                                        </Link>
+                                        <div className="border-t border-gray-200 my-1"></div>
+                                        <button
+                                            onClick={() => {
+                                                handleLogout()
+                                                setShowUserMenu(false)
+                                            }}
+                                            className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                        >
+                                            <LogOut className="w-4 h-4 mr-3" />
+                                            Logout
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-            <div className="flex items-center gap-3">
-                <button className="p-2 hover:bg-gray-200 rounded-md transition-colors">
-                    <Home size={20} className="text-gray-700" />
-                </button>
-                <button className="p-2 hover:bg-gray-200 rounded-md transition-colors relative">
-                    <Bell size={20} className="text-gray-700" />
-                    <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-medium">0</span>
-                </button>
-                <button className="p-2 hover:bg-gray-200 rounded-md transition-colors relative">
-                    <MessageSquare size={20} className="text-gray-700" />
-                    <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-medium">0</span>
-                </button>
-                <span className="text-gray-700 font-medium ml-1">Admin</span>
-                <button className="p-2 hover:bg-gray-200 rounded-md transition-colors">
-                    <User size={20} className="text-gray-700" />
-                </button>
-            </div>
-        </div>
+        </header>
     )
 }
 
