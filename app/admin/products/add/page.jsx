@@ -740,7 +740,7 @@ export default function AddProductPage() {
 
                 {/* Brand Variants and Specification Groups - Side by Side Layout */}
                 {(formData.hasVariants && brandVariants.length > 0) || specificationGroups.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className={formData.hasVariants && brandVariants.length > 0 ? "grid grid-cols-1 lg:grid-cols-2 gap-6" : ""}>
                         {/* Brand Variants Section - Left Half */}
                         {formData.hasVariants && brandVariants.length > 0 && (
                             <div className="space-y-4">
@@ -971,9 +971,9 @@ export default function AddProductPage() {
                             </div>
                         )}
 
-                        {/* Specification Groups Section - Right Half */}
+                        {/* Specification Groups Section - Right Half or Full Width with 2 columns */}
                         {specificationGroups.length > 0 && (
-                            <div className="space-y-4">
+                            <div className={formData.hasVariants && brandVariants.length > 0 ? "space-y-4" : "grid grid-cols-1 lg:grid-cols-2 gap-6"}>
                                 {specificationGroups.map((group, index) => (
                                     <div key={group.id} className="bg-white p-6 border border-gray-200 rounded-lg space-y-4">
                                         {/* Group Header */}
