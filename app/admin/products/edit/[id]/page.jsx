@@ -147,15 +147,44 @@ export default function EditProductPage() {
                 // Set specification groups - only if not already initialized for this product
                 if (!formInitializedRef.current || initializedId !== currentProductId) {
                     if (product.specificationGroups) {
-                        setSpecificationGroups(product.specificationGroups.map((group, idx) => ({
-                            id: Date.now() + idx,
-                            groupLabel: group.groupLabel || '',
-                            specifications: group.specifications.map((spec, specIdx) => ({
-                                id: Date.now() + idx * 100 + specIdx,
-                                featureName: spec.featureName || '',
-                                featureValue: spec.featureValue || ''
-                            }))
-                        })))
+                        setSpecificationGroups(product.specificationGroups.map((group, idx) => {
+                            // Convert specifications to textarea content
+                            // Specifications can be in object format (new) or array format (old)
+                            // Join with '?' separator in "Key : Value" format
+                            let content = ''
+                            if (group.specifications) {
+                                if (typeof group.specifications === 'object' && !Array.isArray(group.specifications)) {
+                                    // New format - single object with keys as feature names
+                                    content = Object.entries(group.specifications)
+                                        .map(([key, value]) => `${key} : ${value}`)
+                                        .filter(item => item.trim())
+                                        .join(' ? ')
+                                } else if (Array.isArray(group.specifications) && group.specifications.length > 0) {
+                                    // Old format - array of objects
+                                    content = group.specifications.map(spec => {
+                                        if (spec.featureName && spec.featureValue) {
+                                            // Old format with featureName/featureValue
+                                            return `${spec.featureName} : ${spec.featureValue}`
+                                        } else {
+                                            // Array of objects with dynamic keys
+                                            const keys = Object.keys(spec)
+                                            if (keys.length > 0) {
+                                                const key = keys[0]
+                                                const value = spec[key]
+                                                return `${key} : ${value}`
+                                            }
+                                        }
+                                        return ''
+                                    }).filter(item => item.trim()).join(' ? ')
+                                }
+                            }
+                            
+                            return {
+                                id: Date.now() + idx,
+                                groupLabel: group.groupLabel || '',
+                                content: content
+                            }
+                        }))
                     } else {
                         setSpecificationGroups([])
                     }
@@ -226,9 +255,7 @@ export default function EditProductPage() {
             {
                 id: Date.now(),
                 groupLabel: '',
-                specifications: [
-                    { id: Date.now() + 1, featureName: '', featureValue: '' }
-                ]
+                content: ''
             }
         ])
     }
@@ -245,46 +272,10 @@ export default function EditProductPage() {
         )
     }
 
-    const handleAddSpecification = (groupId) => {
+    const handleUpdateSpecificationContent = (groupId, value) => {
         setSpecificationGroups(prev =>
             prev.map(group =>
-                group.id === groupId
-                    ? {
-                          ...group,
-                          specifications: [
-                              ...group.specifications,
-                              { id: Date.now(), featureName: '', featureValue: '' }
-                          ]
-                      }
-                    : group
-            )
-        )
-    }
-
-    const handleRemoveSpecification = (groupId, specId) => {
-        setSpecificationGroups(prev =>
-            prev.map(group =>
-                group.id === groupId
-                    ? {
-                          ...group,
-                          specifications: group.specifications.filter(spec => spec.id !== specId)
-                      }
-                    : group
-            )
-        )
-    }
-
-    const handleUpdateSpecification = (groupId, specId, field, value) => {
-        setSpecificationGroups(prev =>
-            prev.map(group =>
-                group.id === groupId
-                    ? {
-                          ...group,
-                          specifications: group.specifications.map(spec =>
-                              spec.id === specId ? { ...spec, [field]: value } : spec
-                          )
-                      }
-                    : group
+                group.id === groupId ? { ...group, content: value } : group
             )
         )
     }
@@ -619,18 +610,56 @@ export default function EditProductPage() {
                 sku: variant.sku || ''
             })) : [];
 
-            // Process specification groups - pair all specifications sequentially
+            // Process specification groups - convert textarea content to specifications format
+            // Content is separated by '?' and each item is in "Key : Value" format
+            // Store as a single object with keys as feature names and values as feature values
             const processedSpecificationGroups = specificationGroups.map(group => {
-                console.log('Processing group (Edit):', group.groupLabel)
-                console.log('Group specifications:', group.specifications)
-                const processedSpecs = processSpecificationPairs(group.specifications)
-                console.log('Processed specs for group:', processedSpecs)
+                let specifications = {}
+                
+                if (group.content && group.content.trim()) {
+                    // Split by '?' separator
+                    const items = group.content.split('?').map(item => item.trim()).filter(item => item)
+                    
+                    items.forEach((item, index) => {
+                        // Try to split by colon ':' for "Key : Value" format
+                        const colonIndex = item.indexOf(':')
+                        
+                        if (colonIndex > 0) {
+                            const featureName = item.substring(0, colonIndex).trim()
+                            const featureValue = item.substring(colonIndex + 1).trim()
+                            // Add to specifications object with feature name as key
+                            specifications[featureName || `Item ${index + 1}`] = featureValue
+                        } else {
+                            // If no colon separator, use the whole item as value
+                            specifications[`Item ${index + 1}`] = item.trim()
+                        }
+                    })
+                }
+                
+                // Fallback: if group has old specifications format (array), convert it to object
+                if (group.specifications) {
+                    if (Array.isArray(group.specifications) && group.specifications.length > 0) {
+                        group.specifications.forEach(spec => {
+                            if (spec.featureName && spec.featureValue) {
+                                // Old format with featureName/featureValue
+                                specifications[spec.featureName] = spec.featureValue
+                            } else {
+                                // New format (array of objects with dynamic keys)
+                                const keys = Object.keys(spec)
+                                if (keys.length > 0) {
+                                    specifications[keys[0]] = spec[keys[0]]
+                                }
+                            }
+                        })
+                    } else if (typeof group.specifications === 'object' && !Array.isArray(group.specifications)) {
+                        // Already in object format
+                        specifications = group.specifications
+                    }
+                }
+                
                 return {
                     groupLabel: group.groupLabel,
-                    specifications: processedSpecs.map(spec => ({
-                        featureName: spec.featureName,
-                        featureValue: spec.featureValue
-                    }))
+                    specifications: specifications
                 }
             })
 
@@ -1176,55 +1205,19 @@ export default function EditProductPage() {
                                             />
                                         </div>
 
-                                        {/* Specifications */}
-                                        <div className="space-y-3">
-                                            {group.specifications.map((spec) => (
-                                                <div key={spec.id} className="flex items-end gap-3">
-                                                    <div className="flex-1">
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                            Feature name
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={spec.featureName}
-                                                            onChange={(e) => handleUpdateSpecification(group.id, spec.id, 'featureName', e.target.value)}
-                                                            placeholder="Enter feature name"
-                                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                            Feature value
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={spec.featureValue}
-                                                            onChange={(e) => handleUpdateSpecification(group.id, spec.id, 'featureValue', e.target.value)}
-                                                            placeholder="Enter feature value"
-                                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        />
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveSpecification(group.id, spec.id)}
-                                                        className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition mb-0.5"
-                                                        title="Remove specification"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                </div>
-                                            ))}
+                                        {/* Specification Content Textarea */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Specifications <span className="text-gray-500 text-xs">(Separate each item with '?' and use 'Key : Value' format)</span>
+                                            </label>
+                                            <textarea
+                                                value={group.content || ''}
+                                                onChange={(e) => handleUpdateSpecificationContent(group.id, e.target.value)}
+                                                placeholder="Power : 0.5 HP,1 HP,1.5 HP,2 HP ? Speed : 2780 rpm ? Voltage range: 180v-240v (1ph)—50 HZ"
+                                                rows={6}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
+                                            />
                                         </div>
-
-                                        {/* Add Specification Button */}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleAddSpecification(group.id)}
-                                            className="mt-4 flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-md transition text-sm"
-                                        >
-                                            <Plus size={16} />
-                                            Add Specification
-                                        </button>
                                     </div>
                                 ))}
                             </div>
