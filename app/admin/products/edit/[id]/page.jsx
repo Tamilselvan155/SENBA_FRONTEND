@@ -28,6 +28,7 @@ export default function EditProductPage() {
         title: '',
         isFeatured: true,
         category: '',
+        subcategory: '',
         selectedBrands: [],
         hasVariants: false,
         price: '',
@@ -124,10 +125,12 @@ export default function EditProductPage() {
                     })
                 }
 
+                // Set initial form data - category/subcategory will be set when categories load
                 setFormData({
                     title: product.title || '',
                     isFeatured: product.isFeatured || false,
                     category: product.categoryId?._id || product.categoryId?.id || product.categoryId || '',
+                    subcategory: '',
                     selectedBrands: product.brandIds ? product.brandIds.map(b => b._id || b.id || b) : [],
                     hasVariants: product.hasVariants || false,
                     price: product.price?.toString() || '',
@@ -221,6 +224,27 @@ export default function EditProductPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentProduct, dispatch, params.id])
 
+    // Update category/subcategory when categoriesForDropdown loads
+    useEffect(() => {
+        if (formInitializedRef.current && formData.category && categoriesForDropdown.length > 0) {
+            const currentCategoryId = formData.category;
+            const productCategory = categoriesForDropdown.find(cat => 
+                (cat._id === currentCategoryId || cat.id === currentCategoryId)
+            );
+            
+            // If the current category is a subcategory, update parent and subcategory fields
+            if (productCategory && !productCategory.isParent && productCategory.parentId) {
+                const parentId = productCategory.parentId._id || productCategory.parentId.id || productCategory.parentId || '';
+                setFormData(prev => ({
+                    ...prev,
+                    category: parentId,
+                    subcategory: currentCategoryId
+                }))
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [categoriesForDropdown])
+
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target
         setFormData(prev => {
@@ -235,6 +259,10 @@ export default function EditProductPage() {
             // Clear selected brands if hasVariants is checked
             if (name === 'hasVariants' && checked) {
                 newData.selectedBrands = []
+            }
+            // Clear subcategory when parent category changes
+            if (name === 'category') {
+                newData.subcategory = ''
             }
             return newData
         })
@@ -669,7 +697,8 @@ export default function EditProductPage() {
             const submitData = {
                 title: formData.title,
                 isFeatured: formData.isFeatured,
-                categoryId: formData.category,
+                category: formData.category, // Parent category
+                subcategory: formData.subcategory || null, // Subcategory (optional)
                 brandIds: formData.selectedBrands,
                 hasVariants: formData.hasVariants,
                 status: formData.status,
@@ -773,11 +802,13 @@ export default function EditProductPage() {
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
                         >
                             <option value="">--Select any category--</option>
-                            {categoriesForDropdown.map((cat) => (
-                                <option key={cat._id || cat.id} value={cat._id || cat.id}>
-                                    {cat.title}
-                                </option>
-                            ))}
+                            {categoriesForDropdown
+                                .filter(cat => cat.isParent)
+                                .map((cat) => (
+                                    <option key={cat._id || cat.id} value={cat._id || cat.id}>
+                                        {cat.title}
+                                    </option>
+                                ))}
                         </select>
                         <ChevronDown 
                             size={20} 
@@ -785,6 +816,49 @@ export default function EditProductPage() {
                         />
                     </div>
                 </div>
+
+                {/* Subcategory Field - Only show if parent category has subcategories */}
+                {formData.category && (() => {
+                    const selectedParentId = formData.category;
+                    const subcategories = categoriesForDropdown.filter(cat => {
+                        if (cat.isParent) return false;
+                        if (!cat.parentId) return false;
+                        
+                        // Handle different parentId structures (populated object or ID string)
+                        const parentId = cat.parentId._id || cat.parentId.id || cat.parentId;
+                        return parentId && parentId.toString() === selectedParentId.toString();
+                    });
+                    
+                    if (subcategories.length > 0) {
+                        return (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Subcategory
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        name="subcategory"
+                                        value={formData.subcategory}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                                    >
+                                        <option value="">--Select subcategory--</option>
+                                        {subcategories.map((cat) => (
+                                            <option key={cat._id || cat.id} value={cat._id || cat.id}>
+                                                {cat.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown 
+                                        size={20} 
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                                    />
+                                </div>
+                            </div>
+                        );
+                    }
+                    return null;
+                })()}
 
                 {/* Product Images Section */}
                 <div>

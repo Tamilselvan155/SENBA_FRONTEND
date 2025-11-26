@@ -180,7 +180,7 @@ export default function AddCategoryPage() {
                             name="title"
                             value={formData.title}
                             onChange={handleInputChange}
-                            placeholder="Enter title"
+                            placeholder={formData.isParent ? "Enter parent category title" : "Enter sub category title"}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         />
@@ -196,7 +196,7 @@ export default function AddCategoryPage() {
                                 onChange={handleInputChange}
                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
-                            <span className="text-sm text-gray-700">Is Parent</span>
+                            <span className="text-sm text-gray-700">Is Parent Category</span>
                         </label>
                     </div>
 
@@ -204,16 +204,17 @@ export default function AddCategoryPage() {
                     {!formData.isParent && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Parent Category
+                                Parent Category <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
                                 <select
                                     name="parentCategory"
                                     value={formData.parentCategory}
                                     onChange={handleInputChange}
+                                    required={!formData.isParent}
                                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white text-sm"
                                 >
-                                    <option value="">--Select any category--</option>
+                                    <option value="">--Select Parent Category--</option>
                                     {categoriesForDropdown
                                         .filter(cat => cat.isParent)
                                         .map((cat) => (
@@ -224,6 +225,9 @@ export default function AddCategoryPage() {
                                 </select>
                                 <ChevronDown size={16} className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Select the parent category under which this sub category will be added
+                            </p>
                         </div>
                     )}
 
