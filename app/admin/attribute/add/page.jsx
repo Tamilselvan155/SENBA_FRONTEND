@@ -34,7 +34,7 @@ export default function AddAttributePage() {
         try {
             await dispatch(createAttributeAsync(formData)).unwrap()
             toast.success('Attribute created successfully!')
-            router.push('/admin/attribute')
+        router.push('/admin/attribute')
         } catch (err) {
             toast.error(err || 'Failed to create attribute')
         }

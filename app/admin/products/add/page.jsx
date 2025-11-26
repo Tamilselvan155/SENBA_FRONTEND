@@ -387,6 +387,93 @@ export default function AddProductPage() {
         setImagePreviews([])
     }
 
+    // Helper function to process specifications into pairs
+    // Pairs specifications by index: 1st value of 1st spec with 1st value of 2nd spec, etc.
+    const processSpecificationPairs = (specifications) => {
+        if (!specifications || !Array.isArray(specifications) || specifications.length === 0) {
+            return specifications || []
+        }
+
+        console.log('Processing specifications into pairs...')
+        console.log('Original specifications:', specifications)
+
+        // Parse all specifications and extract their values
+        const parsedSpecs = specifications.map(spec => {
+            const name = (spec.featureName || '').toString().trim()
+            const value = (spec.featureValue || '').toString().trim()
+            
+            if (!name || !value) {
+                return null
+            }
+
+            // Get first letter of feature name
+            const firstLetter = name.charAt(0).toUpperCase()
+            
+            // Parse comma-separated values or use single value
+            const values = value.includes(',') 
+                ? value.split(',').map(v => v.trim()).filter(v => v)
+                : [value]
+
+            return {
+                firstLetter,
+                values,
+                originalName: name
+            }
+        }).filter(spec => spec !== null && spec.values.length > 0)
+
+        console.log('Parsed specifications:', parsedSpecs)
+
+        if (parsedSpecs.length === 0) {
+            return specifications
+        }
+
+        // If we have 2 or more specs, pair them by index
+        if (parsedSpecs.length >= 2) {
+            const firstSpec = parsedSpecs[0]
+            const secondSpec = parsedSpecs[1]
+            
+            // Find the minimum length to pair all available values
+            const minLength = Math.min(firstSpec.values.length, secondSpec.values.length)
+            const pairs = []
+
+            for (let i = 0; i < minLength; i++) {
+                pairs.push({
+                    featureName: `Pair ${i + 1}`,
+                    featureValue: `${firstSpec.firstLetter}${firstSpec.values[i]} ${secondSpec.firstLetter}${secondSpec.values[i]}`
+                })
+            }
+
+            // If there are more than 2 specs, handle them sequentially
+            if (parsedSpecs.length > 2) {
+                // For additional specs, pair them with the next spec
+                for (let specIndex = 2; specIndex < parsedSpecs.length; specIndex++) {
+                    const currentSpec = parsedSpecs[specIndex]
+                    const pairStartIndex = pairs.length
+                    
+                    for (let i = 0; i < currentSpec.values.length; i++) {
+                        pairs.push({
+                            featureName: `Pair ${pairStartIndex + i + 1}`,
+                            featureValue: `${currentSpec.firstLetter}${currentSpec.values[i]}`
+                        })
+                    }
+                }
+            }
+
+            console.log('Generated pairs:', pairs)
+            return pairs
+        } else {
+            // Only one spec - create pairs from its values
+            const singleSpec = parsedSpecs[0]
+            const pairs = singleSpec.values.map((val, index) => ({
+                featureName: `Pair ${index + 1}`,
+                featureValue: `${singleSpec.firstLetter}${val}`
+            }))
+
+            console.log('Generated pairs (single spec):', pairs)
+            return pairs
+        }
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
@@ -421,6 +508,27 @@ export default function AddProductPage() {
                 sku: variant.sku || ''
             })) : [];
 
+            // Debug: Log the original specification groups BEFORE processing
+            console.log('Original Specification Groups (BEFORE processing):', JSON.stringify(specificationGroups, null, 2))
+
+            // Process specification groups - pair all specifications sequentially
+            const processedSpecificationGroups = specificationGroups.map(group => {
+                console.log('Processing group:', group.groupLabel)
+                console.log('Group specifications:', group.specifications)
+                const processedSpecs = processSpecificationPairs(group.specifications)
+                console.log('Processed specs for group:', processedSpecs)
+                return {
+                    groupLabel: group.groupLabel,
+                    specifications: processedSpecs.map(spec => ({
+                        featureName: spec.featureName,
+                        featureValue: spec.featureValue
+                    }))
+                }
+            })
+
+            // Debug: Log the processed specification groups
+            console.log('Processed Specification Groups (AFTER processing):', JSON.stringify(processedSpecificationGroups, null, 2))
+
             const submitData = {
                 title: formData.title,
                 isFeatured: formData.isFeatured,
@@ -429,13 +537,7 @@ export default function AddProductPage() {
                 hasVariants: formData.hasVariants,
                 status: formData.status,
                 images: imageUrls,
-                specificationGroups: specificationGroups.map(group => ({
-                    groupLabel: group.groupLabel,
-                    specifications: group.specifications.map(spec => ({
-                        featureName: spec.featureName,
-                        featureValue: spec.featureValue
-                    }))
-                })),
+                specificationGroups: processedSpecificationGroups,
                 brandVariants: mappedBrandVariants,
                 ...(formData.hasVariants ? {} : {
                     price: formData.price ? parseFloat(formData.price) : 0,
