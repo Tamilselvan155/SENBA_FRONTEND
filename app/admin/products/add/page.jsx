@@ -10,6 +10,8 @@ import { fetchBrandsForDropdownAsync } from "@/lib/features/brand/brandSlice"
 import { fetchAttributesAsync } from "@/lib/features/attribute/attributeSlice"
 import { fetchAttributeValuesByAttributeAsync } from "@/lib/features/attributeValue/attributeValueSlice"
 import toast from "react-hot-toast"
+import axiosInstance from "@/lib/api/axios"
+import Image from "next/image"
 
 export default function AddProductPage() {
     const router = useRouter()
@@ -35,6 +37,9 @@ export default function AddProductPage() {
     const [specificationGroups, setSpecificationGroups] = useState([])
     const [brandVariants, setBrandVariants] = useState([])
     const [attributeValuesMap, setAttributeValuesMap] = useState({})
+    const [images, setImages] = useState([])
+    const [imagePreviews, setImagePreviews] = useState([])
+    const [uploadingImages, setUploadingImages] = useState(false)
 
     useEffect(() => {
         dispatch(fetchCategoriesForDropdownAsync())
@@ -296,6 +301,71 @@ export default function AddProductPage() {
         )
     }
 
+    const handleImageChange = async (e) => {
+        const files = Array.from(e.target.files)
+        if (files.length === 0) return
+
+        // Validate file types and sizes
+        const validFiles = files.filter(file => {
+            const isValidType = file.type.startsWith('image/')
+            const isValidSize = file.size <= 5 * 1024 * 1024 // 5MB
+            if (!isValidType) {
+                toast.error(`${file.name} is not a valid image file`)
+                return false
+            }
+            if (!isValidSize) {
+                toast.error(`${file.name} is too large. Maximum size is 5MB`)
+                return false
+            }
+            return true
+        })
+
+        if (validFiles.length === 0) return
+
+        // Create previews
+        const newPreviews = validFiles.map(file => URL.createObjectURL(file))
+        setImagePreviews(prev => [...prev, ...newPreviews])
+        setImages(prev => [...prev, ...validFiles])
+    }
+
+    const removeImage = (index) => {
+        // Revoke object URL to free memory
+        URL.revokeObjectURL(imagePreviews[index])
+        setImagePreviews(prev => prev.filter((_, i) => i !== index))
+        setImages(prev => prev.filter((_, i) => i !== index))
+    }
+
+    const uploadImages = async () => {
+        if (images.length === 0) return []
+
+        setUploadingImages(true)
+        try {
+            const formData = new FormData()
+            images.forEach((file) => {
+                formData.append('images', file)
+            })
+
+            const response = await axiosInstance.post('/upload/images', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+
+            if (response.data.success) {
+                // Return full URLs with backend base URL
+                const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+                return response.data.urls.map(url => `${baseURL}${url}`)
+            }
+            return []
+        } catch (error) {
+            console.error('Error uploading images:', error)
+            toast.error(error.response?.data?.error || 'Failed to upload images')
+            return []
+        } finally {
+            setUploadingImages(false)
+        }
+    }
+
     const handleReset = () => {
         setFormData({
             title: '',
@@ -311,11 +381,22 @@ export default function AddProductPage() {
         })
         setSpecificationGroups([])
         setBrandVariants([])
+        // Clean up image previews
+        imagePreviews.forEach(preview => URL.revokeObjectURL(preview))
+        setImages([])
+        setImagePreviews([])
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
+            // Upload images first
+            const imageUrls = await uploadImages()
+            if (images.length > 0 && imageUrls.length === 0) {
+                toast.error('Failed to upload images. Please try again.')
+                return
+            }
+
             // Map brand variants to backend format
             const mappedBrandVariants = formData.hasVariants ? brandVariants.map(variant => ({
                 brandId: variant.brand,
@@ -347,6 +428,7 @@ export default function AddProductPage() {
                 brandIds: formData.selectedBrands,
                 hasVariants: formData.hasVariants,
                 status: formData.status,
+                images: imageUrls,
                 specificationGroups: specificationGroups.map(group => ({
                     groupLabel: group.groupLabel,
                     specifications: group.specifications.map(spec => ({
@@ -434,6 +516,59 @@ export default function AddProductPage() {
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
                         />
                     </div>
+                </div>
+
+                {/* Product Images Section */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Product Images
+                    </label>
+                    <div className="flex flex-wrap gap-4">
+                        {/* Preview existing images */}
+                        {imagePreviews.map((preview, index) => (
+                            <div key={index} className="relative group">
+                                <div className="w-32 h-32 rounded-lg border-2 border-gray-300 overflow-hidden bg-gray-100">
+                                    <Image
+                                        src={preview}
+                                        alt={`Preview ${index + 1}`}
+                                        width={128}
+                                        height={128}
+                                        className="object-cover w-full h-full"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removeImage(index)}
+                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition"
+                                    title="Remove image"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ))}
+                        
+                        {/* Add Image Button */}
+                        <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition">
+                            <div className="text-center">
+                                <Plus size={24} className="mx-auto text-gray-400" />
+                                <span className="text-xs text-gray-500 mt-2 block">Add Image</span>
+                            </div>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageChange}
+                                className="hidden"
+                                disabled={uploadingImages}
+                            />
+                        </label>
+                    </div>
+                    {uploadingImages && (
+                        <p className="text-sm text-blue-600 mt-2">Uploading images...</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">
+                        Maximum 10 images, 5MB per image. Supported formats: JPEG, PNG, GIF, WebP
+                    </p>
                 </div>
 
                 {/* Select Brands - Only show when product does NOT have variants */}

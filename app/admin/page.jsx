@@ -2,7 +2,15 @@
 
 import { FolderTree, Package, ClipboardList, FolderOpen, Store, Tag, ImageIcon } from "lucide-react"
 import Link from "next/link"
-import { useMemo, memo } from "react"
+import { useMemo, memo, useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchCategoriesAsync } from "@/lib/features/category/categorySlice"
+import { fetchProductsAsync } from "@/lib/features/product/productSlice"
+import { fetchBrandsAsync } from "@/lib/features/brand/brandSlice"
+import { fetchAttributesAsync } from "@/lib/features/attribute/attributeSlice"
+import { fetchAttributeValuesAsync } from "@/lib/features/attributeValue/attributeValueSlice"
+import { fetchBannersAsync } from "@/lib/features/banner/bannerSlice"
+import { fetchAllMediaFilesAsync } from "@/lib/features/asset/assetSlice"
 
 // Memoize module card to prevent unnecessary re-renders
 const ModuleCard = memo(({ module, getIconColorClass }) => (
@@ -62,19 +70,40 @@ const ModuleCard = memo(({ module, getIconColorClass }) => (
 ModuleCard.displayName = 'ModuleCard';
 
 export default function AdminDashboard() {
+    const dispatch = useDispatch()
     
-    // Sample data - replace with actual API calls
+    // Get data from Redux store
+    const categories = useSelector((state) => state.category.categories || [])
+    const products = useSelector((state) => state.product.products || [])
+    const brands = useSelector((state) => state.brand.brands || [])
+    const attributes = useSelector((state) => state.attribute.attributes || [])
+    const attributeValues = useSelector((state) => state.attributeValue.attributeValues || [])
+    const banners = useSelector((state) => state.banner.banners || [])
+    const assetManager = useSelector((state) => state.asset.mediaFiles?.length || 0)
+    
+    // Fetch data on mount
+    useEffect(() => {
+        dispatch(fetchCategoriesAsync())
+        dispatch(fetchProductsAsync())
+        dispatch(fetchBrandsAsync())
+        dispatch(fetchAttributesAsync())
+        dispatch(fetchAttributeValuesAsync())
+        dispatch(fetchBannersAsync())
+        dispatch(fetchAllMediaFilesAsync())
+    }, [dispatch])
+    
+    // Calculate actual counts from Redux store
     const stats = useMemo(() => ({
-        category: 15,
-        products: 20,
+        category: Array.isArray(categories) ? categories.length : 0,
+        products: Array.isArray(products) ? products.length : 0,
+        brands: Array.isArray(brands) ? brands.length : 0,
+        attributes: Array.isArray(attributes) ? attributes.length : 0,
+        attributeValues: Array.isArray(attributeValues) ? attributeValues.length : 0,
+        banners: Array.isArray(banners) ? banners.length : 0,
+        assetManager: assetManager,
         order: 0,
-        stores: 5,
-        brands: 8,
-        banners: 3,
-        attributes: 12,
-        attributeValues: 9,
-        assetManager: 42,
-    }), [])
+        stores: 0,
+    }), [categories, products, brands, attributes, attributeValues, banners, assetManager])
 
     const modules = useMemo(() => [
         {
