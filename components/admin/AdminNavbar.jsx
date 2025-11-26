@@ -72,8 +72,26 @@ const AdminNavbar = () => {
     const addRoute = getAddRoute(pathname)
     const showAddButton = isModulePage && !isAddOrEditPage && addRoute
 
+    // Get list route for current module
+    const getListRoute = (path) => {
+        if (path.includes('/products')) return '/admin/products'
+        if (path.includes('/category')) return '/admin/category'
+        if (path.includes('/brands')) return '/admin/brands'
+        if (path.includes('/banners')) return '/admin/banners'
+        if (path.includes('/attribute-value')) return '/admin/attribute-value'
+        if (path.includes('/attribute')) return '/admin/attribute'
+        if (path.includes('/asset-manager')) return '/admin/asset-manager'
+        return '/admin'
+    }
+
     const handleBack = () => {
-        router.push('/admin')
+        // If on edit or add page, go to list page; otherwise go to dashboard
+        if (isAddOrEditPage) {
+            const listRoute = getListRoute(pathname)
+            router.push(listRoute)
+        } else {
+            router.push('/admin')
+        }
     }
 
     const handleLogout = () => {
