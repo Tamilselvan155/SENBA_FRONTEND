@@ -5,9 +5,29 @@ import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import DataTable from "@/components/common/DataTable"
 import ConfirmModal from "@/components/common/ConfirmModal"
-import { ImageIcon } from "lucide-react"
 import { fetchCategoriesAsync, deleteCategoryAsync } from "@/lib/features/category/categorySlice"
 import toast from "react-hot-toast"
+
+// Helper function to get full image URL
+const getImageUrl = (photoPath) => {
+    // Check if photoPath is null, undefined, or empty string
+    if (!photoPath || photoPath === '' || photoPath.trim() === '') {
+        return null;
+    }
+    // If it's already a full URL, return as is
+    if (photoPath.startsWith('http://') || photoPath.startsWith('https://')) {
+        return photoPath;
+    }
+    // Get the API base URL
+    let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    // Remove /api from the base URL since static files are served directly from root, not under /api
+    // For example: http://localhost:3001/api -> http://localhost:3001
+    baseUrl = baseUrl.replace(/\/api$/, '');
+    
+    // Ensure path starts with / and doesn't have double slashes
+    const cleanPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
+    return `${baseUrl}${cleanPath}`;
+};
 
 export default function AdminCategory() {
     const router = useRouter()
@@ -26,6 +46,50 @@ export default function AdminCategory() {
             label: 'S.N.',
             sortable: true,
             width: 80,
+        },
+        {
+            key: 'photo',
+            label: 'Photo',
+            width: 100,
+            align: 'center',
+            render: (value, row) => {
+                // Get photo from row.photo or value, handle both cases
+                const photoPath = row?.photo || value || '';
+                const photoUrl = getImageUrl(photoPath);
+                
+                if (photoUrl) {
+                    return (
+                        <div className="flex items-center justify-center w-full">
+                            <img
+                                src={photoUrl}
+                                alt={row?.title || 'Category photo'}
+                                className="w-[50px] h-[50px] object-cover rounded border border-gray-200"
+                                onError={(e) => {
+                                    // Hide the image and show placeholder
+                                    const img = e.target;
+                                    img.style.display = 'none';
+                                    const placeholder = img.nextElementSibling;
+                                    if (placeholder) {
+                                        placeholder.style.display = 'flex';
+                                    }
+                                }}
+                                loading="lazy"
+                            />
+                            <div className="hidden items-center justify-center w-[50px] h-[50px] bg-gray-100 rounded border border-gray-200">
+                                <span className="text-xs text-gray-400">No Image</span>
+                            </div>
+                        </div>
+                    );
+                }
+                // No photo URL available
+                return (
+                    <div className="flex items-center justify-center w-full">
+                        <div className="flex items-center justify-center w-[50px] h-[50px] bg-gray-100 rounded border border-gray-200">
+                            <span className="text-xs text-gray-400">No Image</span>
+                        </div>
+                    </div>
+                );
+            },
         },
         {
             key: 'title',
@@ -68,11 +132,6 @@ export default function AdminCategory() {
             sortable: true,
             filterable: true,
             render: (value) => value || '-',
-        },
-        {
-            key: 'photo',
-            label: 'Photo',
-            render: () => <ImageIcon size={20} className="text-gray-400" />,
         },
         {
             key: 'status',
@@ -122,6 +181,7 @@ export default function AdminCategory() {
         ...cat,
         id: cat.id || cat._id,
         sn: index + 1,
+        photo: cat.photo || '', // Ensure photo field is included
     }))
 
     return (
