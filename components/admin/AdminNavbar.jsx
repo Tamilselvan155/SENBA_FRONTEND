@@ -5,12 +5,35 @@ import { ChevronLeft, User, Settings, LogOut, ChevronDown, Plus } from "lucide-r
 import Image from "next/image"
 import Link from "next/link"
 import { assets } from "@/assets/assets"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useDispatch } from "react-redux"
+import { signOut } from "@/lib/features/login/authSlice"
+import { clearAuthData } from "@/lib/utils/authUtils"
+import toast from "react-hot-toast"
 
 const AdminNavbar = () => {
     const pathname = usePathname()
     const router = useRouter()
+    const dispatch = useDispatch()
     const [showUserMenu, setShowUserMenu] = useState(false)
+    const [userEmail, setUserEmail] = useState('admin@gocart.com')
+    const [userName, setUserName] = useState('Admin')
+
+    // Get user data from localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const userStr = localStorage.getItem('user')
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr)
+                    setUserEmail(user.email || 'admin@gocart.com')
+                    setUserName(user.name || 'Admin')
+                } catch (e) {
+                    console.error('Error parsing user data:', e)
+                }
+            }
+        }
+    }, [])
 
     // Check if we're on a module page (not dashboard)
     const isModulePage = pathname !== '/admin' && pathname !== '/admin/'
@@ -95,9 +118,66 @@ const AdminNavbar = () => {
         }
     }
 
-    const handleLogout = () => {
-        // Implement logout logic
-        router.push('/login')
+    const handleLogout = async () => {
+        try {
+            // Show loading state
+            const logoutToast = toast.loading('Logging out...')
+            
+            // Optional: Call logout API endpoint (if you want to invalidate token on server)
+            // This is optional but recommended for security
+            try {
+                const token = localStorage.getItem('token')
+                if (token) {
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }).catch(() => {
+                        // Ignore API errors - still proceed with client-side logout
+                    })
+                }
+            } catch (apiError) {
+                // Ignore API errors - still proceed with client-side logout
+                console.log('Logout API call failed, proceeding with client-side logout')
+            }
+            
+            // Clear Redux state
+            dispatch(signOut())
+            
+            // Clear all authentication data (localStorage, sessionStorage, etc.)
+            clearAuthData()
+            
+            // Dismiss loading toast and show success
+            toast.dismiss(logoutToast)
+            toast.success('Logged out successfully', { duration: 2000 })
+            
+            // Dispatch custom event to notify other components
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('adminLogout'))
+            }
+            
+            // Small delay to ensure state is cleared before navigation
+            setTimeout(() => {
+                // Navigate to login page (root route)
+                router.push('/')
+                // Force a hard refresh to clear any cached state
+                router.refresh()
+            }, 100)
+        } catch (error) {
+            console.error('Logout error:', error)
+            toast.error('Error during logout. Redirecting...')
+            
+            // Even if there's an error, clear everything and redirect
+            dispatch(signOut())
+            clearAuthData()
+            
+            setTimeout(() => {
+                router.push('/')
+                router.refresh()
+            }, 500)
+        }
     }
 
     return (
@@ -173,8 +253,8 @@ const AdminNavbar = () => {
                                     />
                                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 py-1">
                                         <div className="px-4 py-3 border-b border-gray-200">
-                                            <div className="font-semibold text-gray-900 text-sm">Admin</div>
-                                            <div className="text-xs text-gray-500 mt-0.5">admin@gocart.com</div>
+                                            <div className="font-semibold text-gray-900 text-sm">{userName}</div>
+                                            <div className="text-xs text-gray-500 mt-0.5">{userEmail}</div>
                                         </div>
                                         <Link
                                             href="/admin/profile"
