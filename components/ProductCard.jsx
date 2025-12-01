@@ -75,12 +75,19 @@ Hi, I'm interested in booking an enquiry for the following product:
           onMouseLeave={() => setIsHovered(false)}
         >
           <Image
-            src={product.name === "Centrifugal Monobloc" ? assets.CenMono : product.images[0]}
-            alt={product.name}
+            src={
+              product.name === "Centrifugal Monobloc" 
+                ? assets.CenMono 
+                : (product.images && Array.isArray(product.images) && product.images.length > 0 && product.images[0])
+                  ? product.images[0]
+                  : assets.product_img0 // Use default placeholder image
+            }
+            alt={product.name || 'Product'}
             fill
             className={`object-cover w-full h-full transition-transform duration-300 ${
               isHovered ? 'scale-105' : 'scale-100 translate-y-0'
             }`}
+            unoptimized
           />
         </div>
 

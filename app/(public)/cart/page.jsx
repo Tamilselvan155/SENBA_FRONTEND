@@ -13,7 +13,7 @@ export default function Cart() {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '₹';
     
     const { cartItems } = useSelector(state => state.cart);
-    const products = useSelector(state => state.product.list);
+    const products = useSelector(state => state.product.list || state.product.products || []);
 
     const dispatch = useDispatch();
 
@@ -23,14 +23,21 @@ export default function Cart() {
     const createCartArray = () => {
         setTotalPrice(0);
         const cartArray = [];
+        
+        if (!cartItems || typeof cartItems !== 'object') {
+            setCartArray([]);
+            return;
+        }
+        
         for (const [key, value] of Object.entries(cartItems)) {
-            const product = products.find(product => product.id === key);
+            const product = products.find(product => (product.id || product._id) === key);
             if (product) {
+                const productPrice = product.price || 0;
                 cartArray.push({
                     ...product,
                     quantity: value,
                 });
-                setTotalPrice(prev => prev + product.price * value);
+                setTotalPrice(prev => prev + productPrice * value);
             }
         }
         setCartArray(cartArray);
@@ -41,9 +48,14 @@ export default function Cart() {
     }
 
     useEffect(() => {
-        if (products.length > 0) {
-            console.log("Hello World    ");
+        if (products && Array.isArray(products) && products.length > 0) {
             createCartArray();
+        } else if (cartItems && Object.keys(cartItems).length > 0) {
+            // If products not loaded but cart has items, try to create array anyway
+            createCartArray();
+        } else {
+            setCartArray([]);
+            setTotalPrice(0);
         }
     }, [cartItems, products]);
 
@@ -67,29 +79,44 @@ export default function Cart() {
                         </thead>
                         <tbody>
                             {
-                                cartArray.map((item, index) => (
-                                    <tr key={index} className="space-x-2">
-                                        <td className="flex gap-3 my-4">
-                                            <div className="flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md">
-                                                <Image src={item.images[0]} className="h-14 w-auto" alt="" width={45} height={45} />
-                                            </div>
-                                            <div>
-                                                <p className="max-sm:text-sm">{item.name}</p>
-                                                <p className="text-xs text-slate-500">{item.category}</p>
-                                                <p>{currency}{item.price}</p>
-                                            </div>
-                                        </td>
-                                        <td className="text-center">
-                                            <Counter productId={item.id} />
-                                        </td>
-                                        <td className="text-center">{currency}{(item.price * item.quantity).toLocaleString()}</td>
-                                        <td className="text-center max-md:hidden">
-                                            <button onClick={() => handleDeleteItemFromCart(item.id)} className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all">
-                                                <Trash2Icon size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
+                                cartArray.map((item, index) => {
+                                    // Safely handle images
+                                    const itemImages = item.images && Array.isArray(item.images) && item.images.length > 0 
+                                        ? item.images 
+                                        : [];
+                                    const itemImage = itemImages[0] || '/placeholder-image.jpg';
+                                    
+                                    return (
+                                        <tr key={item.id || item._id || index} className="space-x-2">
+                                            <td className="flex gap-3 my-4">
+                                                <div className="flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md">
+                                                    <Image 
+                                                        src={itemImage} 
+                                                        className="h-14 w-auto" 
+                                                        alt={item.name || 'Product'} 
+                                                        width={45} 
+                                                        height={45}
+                                                        unoptimized
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <p className="max-sm:text-sm">{item.name || item.title || 'Product'}</p>
+                                                    <p className="text-xs text-slate-500">{item.category || ''}</p>
+                                                    <p>{currency}{item.price || 0}</p>
+                                                </div>
+                                            </td>
+                                            <td className="text-center">
+                                                <Counter productId={item.id || item._id} />
+                                            </td>
+                                            <td className="text-center">{currency}{((item.price || 0) * (item.quantity || 0)).toLocaleString()}</td>
+                                            <td className="text-center max-md:hidden">
+                                                <button onClick={() => handleDeleteItemFromCart(item.id || item._id)} className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all">
+                                                    <Trash2Icon size={18} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             }
                         </tbody>
                     </table>

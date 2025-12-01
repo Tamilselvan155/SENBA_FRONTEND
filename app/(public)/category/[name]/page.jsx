@@ -9,11 +9,17 @@ import CategoryProductsFilter from "@/components/CategoryProductsFilter";
 export default function CategoryPage() {
   const { name } = useParams();
 
+  // Decode URL parameter (handles %20 for spaces and other encoded characters)
+  const decodedCategoryName = decodeURIComponent(name || "");
+
   return (
     <div>
       {/* Pass category name to the reusable component */}
-      {name=="products" ? <CategoryProductsFilter categoryName={name.replaceAll("%20","")}/>:<CategoryProducts categoryName={name.replaceAll("%20","")} />}
-      
+      {decodedCategoryName === "products" ? (
+        <CategoryProductsFilter categoryName={decodedCategoryName} />
+      ) : (
+        <CategoryProducts categoryName={decodedCategoryName} />
+      )}
     </div>
   );
 }
