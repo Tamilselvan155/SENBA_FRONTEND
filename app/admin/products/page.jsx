@@ -39,6 +39,12 @@ export default function AdminProducts() {
             filterable: true,
         },
         {
+            key: 'subcategory',
+            label: 'Subcategory',
+            sortable: true,
+            filterable: true,
+        },
+        {
             key: 'isFeatured',
             label: 'Is Featured',
             sortable: true,
