@@ -21,6 +21,41 @@ const ProductDescription = ({ product }) => {
     'Technical Specifications',
   ]
 
+  // Extract applications from specificationGroups
+  const getApplications = () => {
+    if (!product || !product.specificationGroups || !Array.isArray(product.specificationGroups)) {
+      return null;
+    }
+
+    // Find the Applications group
+    const applicationsGroup = product.specificationGroups.find(
+      group => group.groupLabel && 
+      (group.groupLabel.toLowerCase().includes('application') || 
+       group.groupLabel.toLowerCase() === 'applications')
+    );
+
+    if (!applicationsGroup || !applicationsGroup.specifications) {
+      return null;
+    }
+
+    const specs = applicationsGroup.specifications;
+    
+    // Handle both array and object formats
+    if (Array.isArray(specs)) {
+      return specs;
+    } else if (typeof specs === 'object') {
+      // Convert object to array format
+      return Object.entries(specs).map(([key, value]) => ({
+        label: key,
+        value: value
+      }));
+    }
+
+    return null;
+  };
+
+  const applications = getApplications();
+
   return (
     <div className="my-12 text-sm text-slate-700 w-full overflow-x-hidden max-w-7xl mx-auto px-4">
       {/* -------- Specifications -------- */}
@@ -52,7 +87,27 @@ const ProductDescription = ({ product }) => {
             {selectedSubTab === 'Applications' && (
               <div>
                 <h3 className="text-lg font-semibold text-[#c31e5a] mb-3 uppercase">Applications</h3>
-                <p><span className="font-semibold">Type:</span> Residential, Construction site</p>
+                {applications && applications.length > 0 ? (
+                  <table className="w-full border border-slate-200 text-sm md:text-base">
+                    <tbody>
+                      {applications.map((app, index) => {
+                        const label = app.label || app.attributeName || app.name || '';
+                        const value = app.value || app.attributeValue || app.description || '';
+                        return (
+                          <tr 
+                            key={index}
+                            className={index % 2 === 0 ? 'border-b border-slate-200 bg-gray-50' : 'border-b border-slate-200'}
+                          >
+                            <td className="font-semibold p-2 w-1/3">{label}</td>
+                            <td className="p-2">{value}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-slate-500 italic">No applications information available</p>
+                )}
               </div>
             )}
 
@@ -172,22 +227,31 @@ const ProductDescription = ({ product }) => {
                 {openSection === subTab && (
                   <div className="border-t border-slate-200 bg-white overflow-x-auto">
                     {subTab === 'Applications' && (
-                      <table className="w-full border border-slate-200 text-sm">
-                        <tbody>
-                          <tr className="border-b bg-gray-50">
-                            <td className="font-semibold p-2 w-1/3">Type</td>
-                            <td className="p-2">Residential, Construction site</td>
-                          </tr>
-                          <tr className="border-b">
-                            <td className="font-semibold p-2">Usage</td>
-                            <td className="p-2">Suitable for continuous water supply and transfer applications</td>
-                          </tr>
-                          <tr className="border-b bg-gray-50">
-                            <td className="font-semibold p-2">Typical Areas</td>
-                            <td className="p-2">Homes, Apartments, Building complexes, Small commercial units</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                      <div>
+                        {applications && applications.length > 0 ? (
+                          <table className="w-full border border-slate-200 text-sm">
+                            <tbody>
+                              {applications.map((app, index) => {
+                                const label = app.label || app.attributeName || app.name || '';
+                                const value = app.value || app.attributeValue || app.description || '';
+                                return (
+                                  <tr 
+                                    key={index}
+                                    className={index % 2 === 0 ? 'border-b bg-gray-50' : 'border-b'}
+                                  >
+                                    <td className="font-semibold p-2 w-1/3">{label}</td>
+                                    <td className="p-2">{value}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <div className="p-4">
+                            <p className="text-slate-500 italic text-sm">No applications information available</p>
+                          </div>
+                        )}
+                      </div>
                     )}
                     {subTab === 'Materials' && (
                       <table className="w-full border border-slate-200 text-sm">

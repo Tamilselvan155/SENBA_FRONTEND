@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { categories } from "@/assets/assets";
 import { Filter, X, CheckSquare, Droplet, Gauge, Waves, Cpu, Package } from "lucide-react";
 
 export default function ProductFilters({ products, onFilterChange }) {
@@ -16,12 +15,31 @@ export default function ProductFilters({ products, onFilterChange }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(true);
 
-  // Extract unique options
-  const uniquePipeSizes = [...new Set(products.flatMap(p => p.specs.find(s => s.label === "Pipe size")?.value || []))];
-  const uniqueSpeeds = [...new Set(products.flatMap(p => p.specs.find(s => s.label === "Speed")?.value || []))];
-  const uniqueHeadRanges = [...new Set(products.flatMap(p => p.specs.find(s => s.label === "Head range")?.value || []))];
-  const uniqueFlowRanges = [...new Set(products.flatMap(p => p.specs.find(s => s.label === "Flow range")?.value || []))];
-  const uniqueHPs = [...new Set(products.flatMap(p => p.options || []))];
+  // Extract unique categories from products
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+
+  // Extract unique options (with null checks)
+  const uniquePipeSizes = [...new Set(products.flatMap(p => 
+    (p.specs && Array.isArray(p.specs)) 
+      ? p.specs.filter(s => s && s.label === "Pipe size").map(s => s.value).filter(Boolean)
+      : []
+  ))];
+  const uniqueSpeeds = [...new Set(products.flatMap(p => 
+    (p.specs && Array.isArray(p.specs)) 
+      ? p.specs.filter(s => s && s.label === "Speed").map(s => s.value).filter(Boolean)
+      : []
+  ))];
+  const uniqueHeadRanges = [...new Set(products.flatMap(p => 
+    (p.specs && Array.isArray(p.specs)) 
+      ? p.specs.filter(s => s && s.label === "Head range").map(s => s.value).filter(Boolean)
+      : []
+  ))];
+  const uniqueFlowRanges = [...new Set(products.flatMap(p => 
+    (p.specs && Array.isArray(p.specs)) 
+      ? p.specs.filter(s => s && s.label === "Flow range").map(s => s.value).filter(Boolean)
+      : []
+  ))];
+  const uniqueHPs = [...new Set(products.flatMap(p => (p.options && Array.isArray(p.options)) ? p.options : []))];
 
   // Active filter count
   const activeFilterCount = [
