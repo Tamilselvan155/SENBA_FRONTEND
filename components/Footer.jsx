@@ -34,12 +34,6 @@ const Footer = () => {
             ]
         },
         {
-            title: "FOR BUSINESS",
-            links: [
-                { text: "Admin Portal", path: '/admin/login', icon: null },
-            ]
-        },
-        {
             title: "CONTACT",
             links: [
                 { text: "+1-212-456-7890", path: 'tel:+12124567890', icon: PhoneIcon },
@@ -93,7 +87,7 @@ const Footer = () => {
 
                     {/* Links Grid Section */}
                     <div className="w-full lg:w-auto lg:flex-1">
-                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-4 xl:gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-4 xl:gap-6">
                             {linkSections.map((section, index) => (
                                 <div key={index} className="min-w-0">
                                     <h3 className="text-slate-800 text-sm sm:text-base font-semibold mb-3 sm:mb-4 lg:mb-5 text-left">
@@ -123,16 +117,10 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Copyright Section */}
-                <div className="py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 sm:gap-4">
-                    <p className="text-xs sm:text-sm text-slate-500 text-center sm:text-left">
+                <div className="py-4 sm:py-5 flex items-center justify-center">
+                    <p className="text-xs sm:text-sm text-slate-500 text-center">
                         Copyright 2025 © Worley Ventures All Right Reserved.
                     </p>
-                    <Link 
-                        href="/admin/login" 
-                        className="text-xs sm:text-sm text-slate-400 hover:text-slate-600 transition-colors duration-200 whitespace-nowrap"
-                    >
-                        Admin Login
-                    </Link>
                 </div>
             </div>
         </footer>

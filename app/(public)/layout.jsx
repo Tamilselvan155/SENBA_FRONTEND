@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Banner from '@/components/Banner';
+import CategoryNavBar from "@/components/CategoryNavBar";
 
 export default function PublicLayout({ children }) {
     const pathname = usePathname();
@@ -74,6 +75,7 @@ export default function PublicLayout({ children }) {
                 <>
                     <Banner />
                     <Navbar />
+                    <CategoryNavBar />
                 </>
             )}
             {children}

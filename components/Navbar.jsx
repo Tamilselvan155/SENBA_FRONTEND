@@ -174,8 +174,9 @@ const Navbar = memo(() => {
           ? 'bg-white shadow-sm border-b border-gray-200' 
           : 'bg-white border-b border-gray-100'
       }`}
+      style={{ backgroundColor: 'white', zIndex: 50 }}
     >
-      <nav className="relative">
+      <nav className="relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
             {/* Hamburger + Logo (Mobile & Tablet) */}
@@ -231,7 +232,7 @@ const Navbar = memo(() => {
 
               {/* Desktop Menu - Properly spaced */}
               <div className="flex items-center gap-0.5 xl:gap-1 flex-shrink-0">
-              {navItems.map((item) =>
+              {navItems.filter(item => item.label !== "Categories").map((item) =>
                 item.dropdown ? (
                   <div
                     key={item.label}

@@ -75,110 +75,163 @@ const Hero = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ duration: 0.6, ease: "easeInOut" }}
-                            className="relative w-full h-[280px] sm:h-[360px] md:h-[420px] lg:h-[480px]"
+                            className="relative w-full h-[320px] sm:h-[400px] md:h-[480px] lg:h-[550px] xl:h-[600px]"
+                            style={{ position: 'relative', zIndex: 1 }}
                         >
-                            {/* Background Image Layer - Bottom Layer (z-0) */}
+                            {/* Background Image Layer - Bottom Layer */}
         <Image
           src={mounted ? slides[current].image : slides[0].image}
           alt={mounted ? slides[current].title : slides[0].title}
                                 fill
           priority
-                                className="object-cover z-0"
+                                className="object-cover"
                             />
                             
-                            {/* Professional Gradient Overlay - Middle Layer (z-10) */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/20 z-10 pointer-events-none"></div>
+                            {/* Professional Gradient Overlay - Middle Layer */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/20 pointer-events-none" style={{ zIndex: 1 }}></div>
                             
-                            {/* Content Container - Top Layer (z-[60] to be above navbar z-50) */}
-                            <div className="absolute inset-0 z-[60] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
-                                <div className="h-full flex flex-col justify-center items-start">
+                            {/* Content Container - Top Layer */}
+                            <div className="absolute inset-0 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8" style={{ zIndex: 10, position: 'relative' }}>
+                                <div className="h-full flex flex-col justify-center items-start relative" style={{ zIndex: 11 }}>
                                     <motion.div
-                                        initial={{ opacity: 0, x: -30 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.2, duration: 0.6 }}
-                                        className="max-w-2xl text-white pointer-events-auto"
+                                        key={`content-${current}`}
+                                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -30, scale: 0.95 }}
+                                        transition={{ 
+                                            duration: 0.6, 
+                                            ease: [0.25, 0.46, 0.45, 0.94],
+                                            staggerChildren: 0.15
+                                        }}
+                                        className="max-w-full sm:max-w-xl md:max-w-2xl text-white relative w-full"
+                                        style={{ 
+                                            zIndex: 12, 
+                                            position: 'relative',
+                                            willChange: 'transform, opacity',
+                                            backfaceVisibility: 'hidden'
+                                        }}
                                     >
                                         <motion.h1 
-                                            key={`title-${current}`}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.5 }}
-                                            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 leading-tight tracking-tight text-white drop-shadow-2xl"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ 
+                                                delay: 0.1, 
+                                                duration: 0.6,
+                                                ease: "easeOut"
+                                            }}
+                                            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 mt-16 sm:mt-20 md:mt-24 lg:mt-28 xl:mt-32 leading-tight tracking-tight text-white drop-shadow-2xl relative text-left"
+                                            style={{ 
+                                                textShadow: '2px 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)',
+                                                zIndex: 13,
+                                                position: 'relative'
+                                            }}
                                         >
                                             {mounted ? slides[current].title : slides[0].title}
                                         </motion.h1>
                                         
                                         <motion.p 
-                                            key={`subtitle-${current}`}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.1, duration: 0.5 }}
-                                            className="text-sm sm:text-base md:text-lg lg:text-xl text-white mb-6 sm:mb-8 max-w-xl leading-relaxed drop-shadow-lg"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ 
+                                                delay: 0.25, 
+                                                duration: 0.6,
+                                                ease: "easeOut"
+                                            }}
+                                            className="text-xs sm:text-sm md:text-base lg:text-lg text-white mb-4 sm:mb-5 md:mb-6 max-w-full sm:max-w-lg leading-relaxed drop-shadow-lg relative text-left"
+                                            style={{ 
+                                                textShadow: '1px 1px 6px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)',
+                                                zIndex: 13,
+                                                position: 'relative'
+                                            }}
                                         >
                                             {mounted ? slides[current].subtitle : slides[0].subtitle}
                                         </motion.p>
                                         
                                         <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.2, duration: 0.5 }}
+                                            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            transition={{ 
+                                                delay: 0.4, 
+                                                duration: 0.5,
+                                                ease: "easeOut"
+                                            }}
+                                            className="relative flex justify-start mt-2 sm:mt-3"
+                                            style={{ zIndex: 13, position: 'relative' }}
                                         >
                                             <Link href="/category/products">
-                                                <button className="group bg-[#7C2A47] hover:bg-[#7C2A47]/90 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 flex items-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95">
+                                                <motion.button 
+                                                    whileHover={{ scale: 1.05, y: -2 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    className="group bg-[#7C2A47] hover:bg-[#7C2A47]/90 active:bg-[#7C2A47]/80 text-white px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-lg sm:rounded-xl text-xs sm:text-sm md:text-base font-semibold transition-all duration-300 flex items-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl relative touch-manipulation"
+                                                    style={{ zIndex: 14, position: 'relative', minHeight: '44px' }}
+                                                >
                                                     <span>{mounted ? slides[current].cta : slides[0].cta}</span>
-                                                    <ArrowRightIcon size={20} className="group-hover:translate-x-1 transition-transform" />
-                                                </button>
+                                                    <motion.div
+                                                        animate={{ x: [0, 5, 0] }}
+                                                        transition={{ 
+                                                            duration: 1.5,
+                                                            repeat: Infinity,
+                                                            ease: "easeInOut"
+                                                        }}
+                                                    >
+                                                        <ArrowRightIcon size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+                                                    </motion.div>
+                                                </motion.button>
                                             </Link>
                                         </motion.div>
                                     </motion.div>
                                 </div>
                             </div>
 
-                            {/* Navigation Arrows - Top Layer (z-[60] to be above navbar) */}
+                            {/* Navigation Arrows - Responsive */}
                             {mounted && (
                                 <>
                                     <button
                                         onClick={prevSlide}
-                                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2 sm:p-3 rounded-full transition-all duration-300 z-[60] group"
+                                        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 active:bg-white/40 backdrop-blur-sm p-2 sm:p-2.5 md:p-3 rounded-full transition-all duration-300 group touch-manipulation"
                                         aria-label="Previous slide"
+                                        style={{ zIndex: 15, position: 'absolute', minWidth: '44px', minHeight: '44px' }}
                                     >
-                                        <ChevronLeft size={20} className="text-white group-hover:scale-110 transition-transform" />
+                                        <ChevronLeft size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6 text-white group-hover:scale-110 transition-transform" />
                                     </button>
                                     <button
                                         onClick={nextSlide}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2 sm:p-3 rounded-full transition-all duration-300 z-[60] group"
+                                        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 active:bg-white/40 backdrop-blur-sm p-2 sm:p-2.5 md:p-3 rounded-full transition-all duration-300 group touch-manipulation"
                                         aria-label="Next slide"
+                                        style={{ zIndex: 15, position: 'absolute', minWidth: '44px', minHeight: '44px' }}
                                     >
-                                        <ChevronRight size={20} className="text-white group-hover:scale-110 transition-transform" />
+                                        <ChevronRight size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6 text-white group-hover:scale-110 transition-transform" />
                                     </button>
                                 </>
                             )}
 
-                            {/* Professional Navigation Dots - Top Layer (z-[60] to be above navbar) */}
-      {mounted && (
-                                <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2.5 z-[60]">
-          {slides.map((_, index) => (
-            <button
-              key={index}
+                            {/* Professional Navigation Dots - Bottom Center */}
+                            {mounted && (
+                                <div 
+                                    className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2.5 items-center justify-center z-20" 
+                                >
+                                    {slides.map((_, index) => (
+                                        <button
+                                            key={index}
                                             onClick={() => goToSlide(index)}
                                             className={`rounded-full transition-all duration-300 ${
                                                 current === index 
-                                                    ? "bg-white w-8 h-2.5" 
+                                                    ? "bg-white w-8 h-2.5 shadow-lg" 
                                                     : "bg-white/40 hover:bg-white/60 w-2.5 h-2.5"
                                             }`}
                                             aria-label={`Go to slide ${index + 1}`}
                                         />
-          ))}
-        </div>
-      )}
+                                    ))}
+                                </div>
+                            )}
                         </motion.div>
                     </AnimatePresence>
                 </div>
             </div>
 
             {/* Promotional Cards Section - Professional Grid Layout */}
-            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'>
-                <div className='grid grid-cols-2 gap-4 sm:gap-5 lg:gap-6'>
+            <div className='max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6'>
                     {/* Best Products Card */}
                     <Link href="/category/products" className="group">
                         <motion.div
@@ -191,23 +244,23 @@ const Hero = () => {
                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-green-600 rounded-full blur-2xl"></div>
                 </div>
 
-                            <div className="relative z-10 flex-1">
-                                <h3 className='text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-500 bg-clip-text text-transparent mb-2 sm:mb-3'>
+                            <div className="relative z-10 flex-1 w-full sm:w-auto">
+                                <h3 className='text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-500 bg-clip-text text-transparent mb-2 sm:mb-3'>
                                     Best Products
                                 </h3>
-                                <p className='text-sm sm:text-base text-emerald-700 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all'>
+                                <p className='text-xs sm:text-sm md:text-base text-emerald-700 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all'>
                                     Explore Collection
-                                    <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRightIcon size={16} className="sm:w-4 sm:h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                                 </p>
                             </div>
-                            <div className="relative z-10 flex-shrink-0 ml-4">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl bg-white/90 p-2.5 shadow-xl transition-all duration-300">
+                            <div className="relative z-10 flex-shrink-0 sm:ml-4 self-center sm:self-auto">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-white/90 p-2 sm:p-2.5 shadow-xl transition-all duration-300">
                                     <Image 
                                         className='w-full h-full object-contain' 
                                         src={assets.product_img2} 
                                         alt="Best Products" 
-                                        width={128}
-                                        height={128}
+                                        width={96}
+                                        height={96}
                                     />
                                 </div>
                         </div>
@@ -226,29 +279,29 @@ const Hero = () => {
                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-cyan-600 rounded-full blur-2xl"></div>
                     </div>
 
-                            <div className="relative z-10 flex-1">
-                                <div className="flex items-center gap-2 mb-1.5">
-                                    <span className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                            <div className="relative z-10 flex-1 w-full sm:w-auto">
+                                {/* <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
+                                    <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
                                         20%
                                     </span>
-                                    <span className="text-base sm:text-lg font-semibold text-blue-700">OFF</span>
-                                </div>
-                                <h3 className='text-lg sm:text-xl lg:text-2xl font-bold text-blue-800 mb-2 sm:mb-3'>
+                                    <span className="text-xs sm:text-sm md:text-base font-semibold text-blue-700">OFF</span>
+                                </div> */}
+                                <h3 className='text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 bg-clip-text text-transparent mb-2 sm:mb-3'>
                                     Special Discounts
                                 </h3>
-                                <p className='text-sm sm:text-base text-blue-700 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all'>
+                                <p className='text-xs sm:text-sm md:text-sm text-blue-700 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all'>
                                     Shop Now
-                                    <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRightIcon size={16} className="sm:w-4 sm:h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                                 </p>
                             </div>
-                            <div className="relative z-10 flex-shrink-0 ml-4">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl bg-white/90 p-2.5 shadow-xl transition-all duration-300">
+                            <div className="relative z-10 flex-shrink-0 sm:ml-4 self-center sm:self-auto">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-white/90 p-2 sm:p-2.5 shadow-xl transition-all duration-300">
                                     <Image 
                                         className='w-full h-full object-contain' 
                                         src={assets.product_img6} 
                                         alt="Discounts" 
-                                        width={128}
-                                        height={128}
+                                        width={96}
+                                        height={96}
                                     />
                         </div>
                     </div>
