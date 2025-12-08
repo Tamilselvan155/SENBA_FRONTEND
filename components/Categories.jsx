@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const categories = [
   "Pumps",
@@ -63,108 +64,115 @@ export default function Categories() {
   }
 
   return (
-    <div className="px-4 mt-10 sm:my-20 max-w-7xl mx-auto">
-      <Title title="Shop by Category" description="Explore products by category" visibleButton={false} />
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl mx-auto bg-white">
+      <Title title="Shop by Category" description="Browse our wide range of product categories" visibleButton={false} />
 
       {/* Mobile / Tablet */}
-      <div className="mt-8 lg:hidden relative flex items-center justify-between w-full overflow-x-hidden">
-        <button
-          onClick={handlePrev}
-          disabled={startIndex === 0}
-          className={`absolute -left-5 sm:left-2 md:left-0 top-[42%] -translate-y-1/2 p-3 rounded-full z-10 transition-all ${
-            startIndex === 0 ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-200'
-          }`}
-        >
-          <ChevronLeft className="h-8 w-8 text-gray-700" />
-        </button>
-
-        <div className="overflow-x-auto w-full px-0 snap-x snap-mandatory scrollbar-hide touch-pan-y touch-pan-x">
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${startIndex * (100 / itemsPerPage)}%)` }}
+      <div className="mt-8 lg:hidden relative w-full">
+        <div className="relative flex items-center justify-center px-10 sm:px-12">
+          <button
+            onClick={handlePrev}
+            disabled={startIndex === 0}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-2.5 sm:p-3 rounded-full z-20 transition-all flex-shrink-0 ${
+              startIndex === 0 
+                ? 'opacity-30 cursor-not-allowed' 
+                : 'opacity-100 hover:bg-gray-50 active:scale-95'
+            }`}
+            aria-label="Previous categories"
           >
-            {categories.map((cat, index) => (
-              <Link
-                key={index}
-                href={`/category/${cat}`}
-                className={`group flex-shrink-0 px-4 flex flex-col items-center snap-start ${
-                  itemsPerPage === 2 ? 'w-1/2' : 'w-1/3'
-                }`}
-              >
-                {/* <div className="bg-[#F5F5F5] h-36 w-36 rounded-full flex items-center justify-center overflow-hidden">
-                  <Image
-                    src={categoryImages[cat]}
-                    alt={cat}
-                    width={144}
-                    height={144}
-                    className="scale-110 group-hover:scale-115 transition duration-300"
-                  />
-                </div> */}
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" />
+          </button>
 
-                <div className="bg-[#F5F5F5] h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 rounded-full flex items-center justify-center overflow-hidden"
+          <div className="overflow-hidden w-full">
+            <div
+              className="flex transition-transform duration-500 ease-in-out gap-3"
+              style={{ transform: `translateX(-${startIndex * (100 / itemsPerPage)}%)` }}
+            >
+              {categories.map((cat, index) => (
+                <Link
+                  key={index}
+                  href={`/category/${cat}`}
+                  className={`group flex-shrink-0 flex flex-col ${
+                    itemsPerPage === 2 ? 'w-1/2' : 'w-1/3'
+                  }`}
                 >
-                  <Image
-                  src={categoryImages[cat]}
-                    alt={cat}
-                    width={120}
-                    height={120}
-                    
-                    className="scale-110 group-hover:scale-115 transition duration-300"
-                  />
-                </div>
-
-                <p className="text-center mt-3 text-sm text-[13px] sm:text-[14px] font-medium text-slate-800">{cat}</p>
-              </Link>
-            ))}
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-lg transition-all duration-300 h-full"
+                  >
+                    <div className="bg-gray-50 rounded-lg h-28 w-full flex items-center justify-center overflow-hidden mb-3">
+                      <Image
+                        src={categoryImages[cat]}
+                        alt={cat}
+                        width={96}
+                        height={96}
+                        className="object-contain transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                    <p className="text-center text-xs sm:text-sm font-semibold text-gray-800 leading-tight">
+                      {cat}
+                    </p>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <button
-          onClick={handleNext}
-          disabled={startIndex + itemsPerPage >= categories.length}
-          className={`absolute -right-5 sm:right-2 md:right-0 top-[42%] -translate-y-1/2 p-3 rounded-full z-10 transition-all ${
-            startIndex + itemsPerPage >= categories.length
-              ? 'opacity-40 pointer-events-none'
-              : 'hover:bg-gray-200'
-          }`}
-        >
-          <ChevronRight className="h-8 w-8 text-gray-700" />
-        </button>
+          <button
+            onClick={handleNext}
+            disabled={startIndex + itemsPerPage >= categories.length}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-2.5 sm:p-3 rounded-full z-20 transition-all flex-shrink-0 ${
+              startIndex + itemsPerPage >= categories.length
+                ? 'opacity-30 cursor-not-allowed'
+                : 'opacity-100 hover:bg-gray-50 active:scale-95'
+            }`}
+            aria-label="Next categories"
+          >
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" />
+          </button>
+        </div>
       </div>
 
-      {/* Desktop */}
-      <div className="hidden lg:block mt-12 relative flex items-center justify-between w-full">
+      {/* Desktop - Myntra Style */}
+      <div className="hidden lg:block mt-6 relative">
         <button
           onClick={handlePrev}
           disabled={startIndex === 0}
-          className={`absolute left-0 top-[43%] -translate-y-1/2 p-3 rounded-full z-10 transition-all -ml-6 ${
-            startIndex === 0 ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-200'
+          className={`absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-3 rounded-full z-10 transition-all -ml-6 ${
+            startIndex === 0 ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-50 active:scale-95'
           }`}
         >
-          <ChevronLeft className="h-8 w-8 text-gray-700" />
+          <ChevronLeft className="h-6 w-6 text-gray-700" />
         </button>
 
         <div className="overflow-x-auto w-full px-0 snap-x snap-mandatory scrollbar-hide">
           <div
-            className="flex transition-transform duration-500 ease-in-out"
+            className="flex transition-transform duration-500 ease-in-out gap-4"
             style={{ transform: `translateX(-${startIndex * (100 / 5)}%)` }}
           >
             {categories.map((cat, index) => (
               <Link
                 key={index}
                 href={`/category/${cat}`}
-                className="group flex-shrink-0 w-1/5 px-4 flex flex-col items-center snap-center"
+                className="group flex-shrink-0 w-1/5 flex flex-col snap-center"
               >
-                <div className="bg-[#F5F5F5] h-32 w-32 rounded-full flex items-center justify-center overflow-hidden">
-                  <Image
-                    src={categoryImages[cat]}
-                    alt={cat}
-                    width={120}
-                    height={120}
-                    className="scale-110 group-hover:scale-115 transition duration-300"
-                  />
-                </div>
-                <p className="font-medium text-center mt-2 text-sm text-slate-800">{cat}</p>
+                <motion.div
+                  whileHover={{ y: -6 }}
+                  className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                >
+                  <div className="bg-gray-50 rounded-lg h-48 w-full flex items-center justify-center overflow-hidden mb-4">
+                    <Image
+                      src={categoryImages[cat]}
+                      alt={cat}
+                      width={160}
+                      height={160}
+                      className="object-contain transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+                  <p className="font-semibold text-center text-base text-gray-800 group-hover:text-[#c31e5aff] transition-colors">
+                    {cat}
+                  </p>
+                </motion.div>
               </Link>
             ))}
           </div>
@@ -173,13 +181,13 @@ export default function Categories() {
         <button
           onClick={handleNext}
           disabled={startIndex + 5 >= categories.length}
-          className={`absolute right-0 top-[43%] -translate-y-1/2 p-3 rounded-full z-10 transition-all -mr-6 ${
+          className={`absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-3 rounded-full z-10 transition-all -mr-6 ${
             startIndex + 5 >= categories.length
               ? 'opacity-40 pointer-events-none'
-              : 'hover:bg-gray-200'
+              : 'hover:bg-gray-50 active:scale-95'
           }`}
         >
-          <ChevronRight className="h-8 w-8 text-gray-700" />
+          <ChevronRight className="h-6 w-6 text-gray-700" />
         </button>
       </div>
     </div>

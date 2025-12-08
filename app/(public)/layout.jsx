@@ -44,8 +44,8 @@ export default function PublicLayout({ children }) {
         }
     }, [email]);
 
-    // Check if we're showing login page (not authenticated and on root route or admin login)
-    const isLoginPage = (pathname === '/' || pathname === '/admin/login' || pathname === '/admin') && !isAuthenticated;
+    // Check if we're showing login page - only actual login routes, not homepage
+    const isLoginPage = (pathname === '/login' || pathname === '/admin/login' || pathname === '/admin') && !isAuthenticated;
 
     // Show navbar only when not on login page and not checking
     const shouldShowNavbar = !isChecking && !isLoginPage;
