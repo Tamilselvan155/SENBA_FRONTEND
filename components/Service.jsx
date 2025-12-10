@@ -3,10 +3,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import { assets } from '@/assets/assets'
-import Title from './Title'
+import { motion } from 'framer-motion'
 
 const applications = [
   { label: 'Agriculture', src: assets.agri },
@@ -19,21 +18,6 @@ const applications = [
 const itemsPerPageMobile = 2
 const itemsPerPageTablet = 3
 const itemsPerPageDesktop = 5
-
-// Animation Variants
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15, // delay between each card
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
-}
 
 export default function PumpApplications() {
   const [mobileIndex, setMobileIndex] = useState(0)
@@ -64,160 +48,180 @@ export default function PumpApplications() {
   }
 
   return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: false, amount: 0.3 }}
-      variants={containerVariants}
-      className="px-4 mt-10 mb-10 max-w-7xl mx-auto overflow-x-hidden scrollbar-hide"
-    >
-      <Title
-        title={`Precision Engineering For a Better World`}
-        href={`/category/products`}
-      />
+    <section className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-8 sm:py-12 md:py-16 bg-white">
+      {/* Custom Header Layout */}
+      <div className="flex flex-col items-center text-center mb-8 sm:mb-10 md:mb-12">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight mb-4 sm:mb-5 leading-tight">
+          Precision Engineering For a Better World
+        </h2>
+        <p className="text-base sm:text-lg md:text-xl text-gray-700 mb-6 sm:mb-7 leading-relaxed max-w-2xl mx-auto">
+          Discover our range of innovative solutions
+        </p>
+        <Link
+          href="/category/products"
+          className="inline-flex items-center gap-2.5 text-base sm:text-lg font-semibold text-[#c31e5aff] hover:text-[#a01a47ff] transition-colors duration-200 group"
+        >
+          <span>View All</span>
+          <ArrowRight
+            size={20}
+            className="transition-transform duration-200 group-hover:translate-x-1"
+          />
+        </Link>
+      </div>
 
       {/* --- Mobile Carousel (below md: 768px) --- */}
-      <div className="md:hidden relative flex items-center justify-between w-full">
+      <div className="md:hidden relative flex items-center justify-between w-full px-6 sm:px-8 mt-4 sm:mt-6">
         <button
           onClick={handleMobilePrev}
           disabled={mobileIndex === 0}
-          className={`absolute left-0.5 top-[42%] -translate-y-1/2 p-3 rounded-full z-10 -ml-6 ${
-            mobileIndex === 0 ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-200'
+          className={`absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-2 sm:p-2.5 rounded-full z-20 transition-all touch-manipulation ${
+            mobileIndex === 0 
+              ? 'opacity-30 cursor-not-allowed' 
+              : 'opacity-100 hover:bg-gray-50 active:scale-95 active:bg-gray-100'
           }`}
+          aria-label="Previous items"
+          style={{ minWidth: '44px', minHeight: '44px' }}
         >
-          <ChevronLeft className="h-8 w-8 text-gray-700" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" />
         </button>
 
         <div className="overflow-x-auto w-full snap-x snap-mandatory scrollbar-hide touch-pan-y touch-pan-x">
-          <motion.div
-            className="flex transition-transform duration-500 ease-in-out mt-5"
+          <div
+            className="flex transition-transform duration-500 ease-in-out gap-2 sm:gap-3"
             style={{ transform: `translateX(-${mobileIndex * (100 / itemsPerPageMobile)}%)` }}
-            variants={containerVariants}
           >
             {applications.map((app, index) => (
-              <motion.div
+              <Link
                 key={index}
-                className="group flex-shrink-0 w-1/2 px-4 flex flex-col items-center snap-start"
-                variants={itemVariants}
+                href="/category/products"
+                className="group flex-shrink-0 w-1/2 flex flex-col snap-start px-1 sm:px-2"
               >
-                {/* <div className="bg-[#F5F5F5] h-36 w-36 rounded-full flex items-center justify-center overflow-hidden">
-                  <Image
-                    className="scale-110 group-hover:scale-115 transition duration-300"
-                    src={app.src}
-                    alt={app.label}
-                    width={144}
-                    height={144}
-                  />
-                </div> */}
-                <div className="bg-[#F5F5F5] h-32 w-32 sm:h-36 sm:w-36 lg:h-40 lg:w-40 rounded-full flex items-center justify-center overflow-hidden"
-
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 h-full"
                 >
-                        <Image
-                          src={app.src}
-                          alt={app.label}
-                          width={160}
-                          height={160}
-                          className="scale-110 group-hover:scale-115 transition duration-300"
-                        />
-                      </div>
-
-                <p className="text-center mt-5 text-[15px] font-medium text-slate-800">{app.label}</p>
-              </motion.div>
+                  <div className="bg-gray-50 rounded-lg h-24 sm:h-28 md:h-32 w-full flex items-center justify-center overflow-hidden mb-2 sm:mb-3">
+                    <Image
+                      src={app.src}
+                      alt={app.label}
+                      width={100}
+                      height={100}
+                      className="object-contain transition-transform duration-300 group-hover:scale-110 w-auto h-auto max-w-full max-h-full"
+                      style={{ width: "auto", height: "auto" }}
+                    />
+                  </div>
+                  <p className="text-center text-sm sm:text-base font-semibold text-gray-900 leading-tight px-1">{app.label}</p>
+                </motion.div>
+              </Link>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         <button
           onClick={handleMobileNext}
           disabled={mobileIndex + itemsPerPageMobile >= applications.length}
-          className={`absolute right-0.5 top-[42%] -translate-y-1/2 p-3 rounded-full z-10 -mr-6 ${
+          className={`absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-2 sm:p-2.5 rounded-full z-20 transition-all touch-manipulation ${
             mobileIndex + itemsPerPageMobile >= applications.length
-              ? 'opacity-40 pointer-events-none'
-              : 'hover:bg-gray-200'
+              ? 'opacity-30 cursor-not-allowed'
+              : 'opacity-100 hover:bg-gray-50 active:scale-95 active:bg-gray-100'
           }`}
+          aria-label="Next items"
+          style={{ minWidth: '44px', minHeight: '44px' }}
         >
-          <ChevronRight className="h-8 w-8 text-gray-700" />
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" />
         </button>
       </div>
 
       {/* --- Tablet Carousel (md: 768px to lg: 1023px) --- */}
-      <div className="hidden md:block lg:hidden relative flex items-center justify-between w-full">
+      <div className="hidden md:block lg:hidden relative flex items-center justify-between w-full mt-6 sm:mt-8">
         <button
           onClick={handleTabletPrev}
           disabled={tabletIndex === 0}
-          className={`absolute -left-1 top-[43%] -translate-y-1/2 p-3 rounded-full z-10 ${
-            tabletIndex === 0 ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-200'
+          className={`absolute -left-2 md:-left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-2.5 md:p-3 rounded-full z-10 transition-all touch-manipulation ${
+            tabletIndex === 0 ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-50 active:scale-95 active:bg-gray-100'
           }`}
+          style={{ minWidth: '44px', minHeight: '44px' }}
         >
-          <ChevronLeft className="h-8 w-8 text-gray-700" />
+          <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
         </button>
 
         <div className="overflow-x-auto w-full snap-x snap-mandatory scrollbar-hide touch-pan-y touch-pan-x">
-          <motion.div
-            className="flex transition-transform duration-500 ease-in-out mt-5"
+          <div
+            className="flex transition-transform duration-500 ease-in-out gap-3 md:gap-4"
             style={{ transform: `translateX(-${tabletIndex * (100 / itemsPerPageTablet)}%)` }}
-            variants={containerVariants}
           >
             {applications.map((app, index) => (
-              <motion.div
+              <Link
                 key={index}
-                className="group flex-shrink-0 w-1/3 px-4 flex flex-col items-center snap-start"
-                variants={itemVariants}
+                href="/category/products"
+                className="group flex-shrink-0 w-1/3 flex flex-col snap-start px-1 md:px-2"
               >
-                <div className="bg-[#F5F5F5] h-40 w-40 rounded-full flex items-center justify-center overflow-hidden">
-                  <Image
-                    className="scale-110 group-hover:scale-115 transition duration-300"
-                    src={app.src}
-                    alt={app.label}
-                    width={160}
-                    height={160}
-                  />
-                </div>
-                <p className=" text-center mt-2 font-medium text-lg text-slate-800">{app.label}</p>
-              </motion.div>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 h-full"
+                >
+                  <div className="bg-gray-50 rounded-lg h-36 md:h-40 w-full flex items-center justify-center overflow-hidden mb-3 md:mb-4">
+                    <Image
+                      className="object-contain transition-transform duration-300 group-hover:scale-110 w-auto h-auto max-w-full max-h-full"
+                      src={app.src}
+                      alt={app.label}
+                      width={130}
+                      height={130}
+                      style={{ width: "auto", height: "auto" }}
+                    />
+                  </div>
+                  <p className="text-center font-semibold text-base md:text-lg text-gray-900 leading-tight">{app.label}</p>
+                </motion.div>
+              </Link>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         <button
           onClick={handleTabletNext}
           disabled={tabletIndex + itemsPerPageTablet >= applications.length}
-          className={`absolute -right-1 top-[43%] -translate-y-1/2 p-3 rounded-full z-10 ${
+          className={`absolute -right-2 md:-right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-gray-200 p-2.5 md:p-3 rounded-full z-10 transition-all touch-manipulation ${
             tabletIndex + itemsPerPageTablet >= applications.length
               ? 'opacity-40 pointer-events-none'
-              : 'hover:bg-gray-200'
+              : 'hover:bg-gray-50 active:scale-95 active:bg-gray-100'
           }`}
+          style={{ minWidth: '44px', minHeight: '44px' }}
         >
-          <ChevronRight className="h-8 w-8 text-gray-700" />
+          <ChevronRight className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
         </button>
       </div>
 
-      {/* --- Desktop Grid (lg: 1024px and above) --- */}
-      <motion.div
-        className="hidden lg:grid mt-12 grid-cols-5 gap-12 justify-between max-w-7xl mx-auto scrollbar-hide"
-        variants={containerVariants}
-      >
+      {/* --- Desktop Grid (lg: 1024px and above) - Myntra Style --- */}
+      <div className="hidden lg:grid mt-6 sm:mt-8 grid-cols-5 gap-3 md:gap-4 lg:gap-5">
         {applications.map((app, index) => (
-          <motion.div
+          <Link
             key={index}
-            className="group flex flex-col items-center"
-            variants={itemVariants}
+            href="/category/products"
+            className="group"
           >
-            <div className="bg-[#F5F5F5] h-32 w-32 sm:h-50 sm:w-50 cursor-pointer hover:shadow-[15px_-15px_0_#f48638] flex items-center justify-center overflow-hidden">
-              <Image
-                className="scale-110 group-hover:scale-115 transition duration-300"
-                src={app.src}
-                alt={app.label}
-                width={200}
-                height={200}
-              />
-            </div>
-            <p className="font-medium text-center mt-2 text-lg text-slate-800">
-              {app.label}
-            </p>
-          </motion.div>
+            <motion.div
+              whileHover={{ y: -6 }}
+              className="bg-white rounded-xl border border-gray-200 p-5 lg:p-6 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+            >
+              <div className="bg-gray-50 rounded-lg h-44 lg:h-48 w-full flex items-center justify-center overflow-hidden mb-3 lg:mb-4">
+                <Image
+                  className="object-contain transition-transform duration-300 group-hover:scale-110 w-auto h-auto max-w-full max-h-full"
+                  src={app.src}
+                  alt={app.label}
+                  width={150}
+                  height={150}
+                  style={{ width: "auto", height: "auto" }}
+                />
+              </div>
+              <p className="font-semibold text-center text-base lg:text-lg text-gray-900 group-hover:text-[#c31e5aff] transition-colors leading-tight">
+                {app.label}
+              </p>
+            </motion.div>
+          </Link>
         ))}
-      </motion.div>
-    </motion.section>
+      </div>
+    </section>
   )
 }

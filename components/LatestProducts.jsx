@@ -1,17 +1,25 @@
 'use client';
 import Title from './Title';
 import ProductCard from './ProductCard';
-import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductsAsync } from '@/lib/features/product/productSlice';
+import { assets } from '@/assets/assets';
 
 const LatestProducts = () => {
-  const products = useSelector((state) => state.product.list);
+  const dispatch = useDispatch();
+  const { products, loading } = useSelector((state) => state.product);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const displayQuantity = 4; // Number of products to show in grid on desktop
   const tabletDisplayQuantity = 2; // Number of products to show in grid on tablet
+
+  // Fetch products on mount
+  useEffect(() => {
+    dispatch(fetchProductsAsync());
+  }, [dispatch]);
 
   // Detect screen size
   useEffect(() => {
@@ -34,10 +42,44 @@ const LatestProducts = () => {
     setCurrentIndex((prev) => Math.min(max - 1, prev + 1));
   };
 
-  // Sort products by creation date (newest first)
-  const sortedProducts = products
-    .slice()
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Transform and filter products
+  const transformedProducts = products && Array.isArray(products) && products.length > 0
+    ? products
+        .filter(product => product.status === 'active') // Only show active products
+        .map(product => {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+          
+          // Handle images - ensure we always have at least one image (placeholder)
+          let productImages = [];
+          if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            productImages = product.images
+              .filter(img => img && img.trim() !== '') // Filter out empty strings
+              .map(img => {
+                if (img.startsWith('http')) return img;
+                // Handle both full paths and relative paths
+                return img.startsWith('/uploads/') ? `${baseUrl}${img}` : `${baseUrl}/uploads/${img}`;
+              });
+          }
+          
+          // If no valid images, use placeholder from assets
+          if (productImages.length === 0) {
+            productImages = [assets.product_img0]; // Use default placeholder image
+          }
+          
+          return {
+            id: product.id || product._id,
+            name: product.title || product.name || 'Untitled Product',
+            images: productImages,
+            price: product.price || 0,
+            category: product.category || '',
+            createdAt: product.createdAt || product.created_at || new Date(),
+          };
+        })
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort by creation date (newest first)
+        .slice(0, 12) // Limit to 12 latest products
+    : [];
+
+  const sortedProducts = transformedProducts;
 
   // Determine width class based on screen size
   const getWidthClass = () => {
@@ -62,21 +104,40 @@ const LatestProducts = () => {
         href="/category/products"
       />
 
+      {/* Loading State */}
+      {loading && sortedProducts.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">Loading products...</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && sortedProducts.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No products available at the moment.</p>
+        </div>
+      )}
+
       {/* Carousel for all screen sizes */}
-      <div className="relative overflow-hidden -mx-2 mt-6">
-        <div
-          className="flex transition-transform duration-500 ease-in-out snap-x snap-mandatory"
-          style={{ transform: `translateX(-${currentIndex * getTranslatePercentage()}%)` }}
-        >
-          {sortedProducts.map((product, i) => (
-            <div
-              key={i}
-              className={`flex-none ${getWidthClass()} snap-start px-2`}
-              style={{ flexShrink: 0 }}
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
+      {sortedProducts.length > 0 && (
+      <div className="relative -mx-2 mt-6">
+        <div className="overflow-x-auto scrollbar-hide pb-8">
+          <div
+            className="flex transition-transform duration-500 ease-in-out snap-x snap-mandatory"
+            style={{ transform: `translateX(-${currentIndex * getTranslatePercentage()}%)` }}
+          >
+            {sortedProducts.map((product, i) => (
+              <div
+                  key={product.id || i}
+                className={`flex-none ${getWidthClass()} snap-start px-2`}
+                style={{ flexShrink: 0 }}
+              >
+                <div className="h-full">
+                  <ProductCard product={product} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Navigation Arrows */}
@@ -99,6 +160,7 @@ const LatestProducts = () => {
           </>
         )}
       </div>
+      )}
     </div>
   );
 };

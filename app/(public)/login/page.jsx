@@ -5,37 +5,101 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2 } from 'lucide-react'; // ✅ Icon for popup
+import { CheckCircle2 } from 'lucide-react';
 import { loginRequest, loginSuccess, loginFailure } from '../../../lib/features/login/authSlice';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { isLoading, error, users } = useSelector((state) => state.auth);
+  const { isLoading, error } = useSelector((state) => state.auth);
 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value.trim();
+    const email = formData.email.trim();
+    const password = formData.password.trim();
+
+    if (!email || !password) {
+      dispatch(loginFailure('Please enter both email and password'));
+      return;
+    }
 
     dispatch(loginRequest());
 
-    setTimeout(() => {
-      const user = users?.find((u) => u.email === email && u.password === password);
-      if (user) {
-        dispatch(loginSuccess({ email }));
-        setShowPopup(true); // ✅ Trigger popup
+    try {
+      // Use the real API endpoint for user login
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          userType: 'user', // Specify user type
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        throw new Error('Server returned an invalid response. Please check if the backend is running.');
+      }
+
+      if (response.ok && data.success) {
+        // Verify that the user's role is 'user'
+        if (data.user.role !== 'user') {
+          const errorMessage = `Please use the Admin login page to login as admin.`;
+          dispatch(loginFailure(errorMessage));
+          toast.error(errorMessage);
+          return;
+        }
+
+        dispatch(loginSuccess({ email: data.user.email, ...data.user }));
+        
+        // Store token and user data
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+        }
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+
+        toast.success('Login successful!');
+        setShowPopup(true);
+        
         setTimeout(() => {
           setShowPopup(false);
           router.push('/');
+          router.refresh();
         }, 2000);
       } else {
-        dispatch(loginFailure('Invalid email or password'));
+        const errorMessage = data.message || 'Invalid email or password';
+        dispatch(loginFailure(errorMessage));
+        toast.error(errorMessage);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      const errorMessage = 'An error occurred. Please try again.';
+      dispatch(loginFailure(errorMessage));
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -87,6 +151,8 @@ const Login = () => {
                 type="email"
                 id="email"
                 name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="example@gmail.com"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#0F172A] focus:border-[#0F172A] transition"
@@ -100,14 +166,25 @@ const Login = () => {
               >
                 Password
               </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#0F172A] focus:border-[#0F172A] transition"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#0F172A] focus:border-[#0F172A] transition pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
             </div>
 
             <button
@@ -119,11 +196,11 @@ const Login = () => {
             </button>
           </form>
 
-         <div className="mt-4 text-center">
-  <Link href="/forgot_password" className="text-xs sm:text-sm text-gray-400 hover:underline">
-    Forgot your password?
-  </Link>
-</div>
+          <div className="mt-4 text-center">
+            <Link href="/forgot_password" className="text-xs sm:text-sm text-gray-400 hover:underline">
+              Forgot your password?
+            </Link>
+          </div>
 
           <div className="flex items-center my-6">
             <hr className="flex-grow border-gray-300" />
@@ -143,7 +220,7 @@ const Login = () => {
         </div>
       </div>
 
-      {/* ✅ Animated Success Popup */}
+      {/* Animated Success Popup */}
       <AnimatePresence>
         {showPopup && (
           <motion.div
